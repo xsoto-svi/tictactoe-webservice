@@ -91,7 +91,7 @@ public class FileGameRepository {
   public List<GameMove> getGameDetailsByGameId(UUID id) {
     List<GameMove> gameDetails = new ArrayList<>();
 
-    Path filePath = Paths.get(PLAYERS_DIR, id.toString() + ".txt");
+    Path filePath = Paths.get(GAMES_DIR, id.toString() + ".txt");
 
     if (!Files.exists(filePath)) {
       return gameDetails;
