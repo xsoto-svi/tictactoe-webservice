@@ -1,5 +1,6 @@
 package com.svi.tictactoe.repository;
 
+import com.svi.tictactoe.mapper.GameMoveMapper;
 import com.svi.tictactoe.model.entity.GameMove;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -13,6 +14,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class FileGameRepository {
@@ -52,8 +54,8 @@ public class FileGameRepository {
     String playerIdString = playerId.toString();
     Path playerPath = Paths.get(PLAYERS_DIR, playerIdString + ".txt");
 
-    List<String> existingGames = getGamesByPlayer(playerId);
-    if (existingGames.contains(gameId.toString())) {
+    List<UUID> existingGames = getGamesByPlayer(playerId);
+    if (existingGames.contains(gameId)) {
       return;
     }
 
@@ -70,39 +72,44 @@ public class FileGameRepository {
     }
   }
 
-  public List<String> getGamesByPlayer(UUID id) {
-    List<String> gameIds = new ArrayList<>();
-
+  public List<UUID> getGamesByPlayer(UUID id) {
     Path filePath = Paths.get(PLAYERS_DIR, id.toString() + ".txt");
 
     if (!Files.exists(filePath)) {
-      return gameIds;
+      return new ArrayList<>();
     }
 
     try {
-      gameIds = Files.readAllLines(filePath, StandardCharsets.UTF_8);
+      List<String> gameIdStrings = Files.readAllLines(filePath, StandardCharsets.UTF_8);
+
+      return gameIdStrings.stream()
+              .filter(line -> line != null && !line.trim().isEmpty())
+              .map(String::trim)
+              .map(UUID::fromString)
+              .collect(Collectors.toList());
     } catch (IOException e) {
       throw new RuntimeException("Failed to read game list for player: " + id, e);
     }
-
-    return gameIds;
   }
 
   public List<GameMove> getGameDetailsByGameId(UUID id) {
-    List<GameMove> gameDetails = new ArrayList<>();
-
     Path filePath = Paths.get(GAMES_DIR, id.toString() + ".txt");
 
     if (!Files.exists(filePath)) {
-      return gameDetails;
+      return new ArrayList<>();
     }
 
     try {
-      gameDetails = Files.readAllLines(filePath, StandardCharsets.UTF_8);
+      List<String> gameDetailStrings = Files.readAllLines(filePath, StandardCharsets.UTF_8);
+
+      return gameDetailStrings.stream()
+              .filter(line -> line != null && !line.trim().isEmpty())
+              .map(String::trim)
+              .map(GameMoveMapper::fromFileString)
+              .collect(Collectors.toList());
+
     } catch (IOException e) {
       throw new RuntimeException("Failed to read game list for player: " + id, e);
     }
-
-    return gameDetails;
   }
 }
