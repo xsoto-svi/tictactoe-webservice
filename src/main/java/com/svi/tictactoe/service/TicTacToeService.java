@@ -1,6 +1,7 @@
 package com.svi.tictactoe.service;
 
 import com.svi.tictactoe.mapper.GameMoveMapper;
+import com.svi.tictactoe.mapper.GameMoveResponseDtoMapper;
 import com.svi.tictactoe.model.dto.request.MoveRequestDto;
 import com.svi.tictactoe.model.dto.response.GameMoveResponseDto;
 import com.svi.tictactoe.model.entity.GameMove;
@@ -17,9 +18,11 @@ public class TicTacToeService {
   @Inject
   private FileGameRepository fileGameRepository;
 
-  public void saveMove(MoveRequestDto moveRequestDto) {
+  public GameMoveResponseDto saveMove(MoveRequestDto moveRequestDto) {
     GameMove move = GameMoveMapper.toEntity(moveRequestDto);
-    fileGameRepository.saveMoveOnTxtFile(move);
+    GameMove savedMove = fileGameRepository.saveMoveOnTxtFile(move);
+
+    return GameMoveResponseDtoMapper.toDto(savedMove);
   }
 
   public List<UUID> getGamesByPlayerName(String name) {

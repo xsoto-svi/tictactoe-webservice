@@ -1,10 +1,7 @@
 package com.svi.tictactoe.resource;
 
 import com.svi.tictactoe.model.dto.request.MoveRequestDto;
-import com.svi.tictactoe.model.dto.response.ApiResponse;
-import com.svi.tictactoe.model.dto.response.GameDetailsResponse;
-import com.svi.tictactoe.model.dto.response.GameMoveResponseDto;
-import com.svi.tictactoe.model.dto.response.ListGamesResponse;
+import com.svi.tictactoe.model.dto.response.*;
 import com.svi.tictactoe.service.TicTacToeService;
 
 import javax.inject.Inject;
@@ -37,7 +34,10 @@ public class TicTacToeResource {
   @POST
   @Path("/save")
   public Response saveMove(@Valid MoveRequestDto moveDto) {
-    return Response.ok().build();
+    GameMoveResponseDto savedMove = ticTacToeService.saveMove(moveDto);
+    return Response.ok()
+            .entity(new SaveMoveResponse(savedMove, "Successfully saved move"))
+            .build();
   }
 
   @GET

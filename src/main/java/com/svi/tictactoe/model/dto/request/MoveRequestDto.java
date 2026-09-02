@@ -1,16 +1,17 @@
 package com.svi.tictactoe.model.dto.request;
 
 import javax.json.bind.annotation.JsonbProperty;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
+import javax.validation.constraints.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class MoveRequestDto {
 
-  @NotBlank(message = "Game ID cannot be blank")
+  @NotNull(message = "Game ID cannot be blank")
+  @Pattern(
+          regexp = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          message = "Invalid UUID format for gameId."
+  )
   @JsonbProperty("gameid")
   private String gameId;
 
@@ -29,23 +30,46 @@ public class MoveRequestDto {
   @JsonbProperty("datetime")
   private LocalDateTime dateSave;
 
+  public MoveRequestDto() {
+  }
+
   public String getGameId() {
     return gameId;
+  }
+
+  public void setGameId(String gameId) {
+    this.gameId = gameId;
   }
 
   public String getPlayerName() {
     return playerName;
   }
 
+  public void setPlayerName(String playerName) {
+    this.playerName = playerName;
+  }
+
   public String getSymbol() {
     return symbol;
+  }
+
+  public void setSymbol(String symbol) {
+    this.symbol = symbol;
   }
 
   public int getLocation() {
     return location;
   }
 
+  public void setLocation(int location) {
+    this.location = location;
+  }
+
   public LocalDateTime getDateSave() {
     return dateSave;
+  }
+
+  public void setDateSave(LocalDateTime dateSave) {
+    this.dateSave = dateSave;
   }
 }

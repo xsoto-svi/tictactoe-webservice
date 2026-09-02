@@ -19,4 +19,15 @@ public class GameMoveResponseDtoMapper {
 
     return move;
   }
+
+  public static GameMoveResponseDto toDto(GameMove gameMove) {
+    GameMoveResponseDto move = new GameMoveResponseDto();
+    move.setGameId(gameMove.getGameId());
+    move.setPlayerName(gameMove.getPlayerName());
+    move.setSymbol(gameMove.getSymbol());
+    move.setLocation(gameMove.getLocation());
+    move.setDateSaved(gameMove.getDateSave());
+
+    return move;
+  }
 }

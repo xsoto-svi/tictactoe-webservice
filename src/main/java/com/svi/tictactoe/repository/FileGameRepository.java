@@ -22,7 +22,7 @@ public class FileGameRepository {
   private static final String GAMES_DIR = "data/games";
   private static final String PLAYERS_DIR = "data/players";
 
-  public void saveMoveOnTxtFile(GameMove move) {
+  public GameMove saveMoveOnTxtFile(GameMove move) {
     String gameIdString = move.getGameId().toString();
     Path gamesPath = Paths.get(GAMES_DIR, gameIdString + ".txt");
 
@@ -43,6 +43,8 @@ public class FileGameRepository {
       );
 
       addGameIdToPlayer(move.getGameId(), move.getPlayerName());
+
+      return move;
 
     } catch (IOException exception) {
       throw new RuntimeException("Failed to save game move to file", exception);
