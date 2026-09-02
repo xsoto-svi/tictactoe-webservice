@@ -1,12 +1,14 @@
 package com.svi.tictactoe.resource;
 
 import com.svi.tictactoe.model.dto.request.MoveRequestDto;
+import com.svi.tictactoe.model.dto.response.ApiResponse;
 import com.svi.tictactoe.model.dto.response.GameDetailsResponse;
 import com.svi.tictactoe.model.dto.response.GameMoveResponseDto;
 import com.svi.tictactoe.model.dto.response.ListGamesResponse;
 import com.svi.tictactoe.service.TicTacToeService;
 
 import javax.inject.Inject;
+import javax.print.attribute.standard.Media;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -22,6 +24,15 @@ public class TicTacToeResource {
 
   @Inject
   private TicTacToeService ticTacToeService;
+
+  @GET
+  @Path("/health")
+  public Response checkHealth() {
+    return Response.ok()
+            .type(MediaType.APPLICATION_JSON)
+            .entity(new ApiResponse("Server is running."))
+            .build();
+  }
 
   @POST
   @Path("/save")
