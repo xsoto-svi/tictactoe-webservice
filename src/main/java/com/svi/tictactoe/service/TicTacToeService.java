@@ -6,10 +6,12 @@ import com.svi.tictactoe.model.dto.response.GameMoveResponseDto;
 import com.svi.tictactoe.model.entity.GameMove;
 import com.svi.tictactoe.repository.FileGameRepository;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.UUID;
 
+@ApplicationScoped
 public class TicTacToeService {
 
   @Inject
