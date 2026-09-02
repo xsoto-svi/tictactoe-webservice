@@ -3,11 +3,11 @@ package com.svi.tictactoe.model.dto.response;
 import java.util.List;
 import java.util.UUID;
 
-public class ListGamesResponseDto {
+public class ListGamesResponse {
   private List<GameItemDto> list;
   private String message;
 
-  public ListGamesResponseDto(List<GameItemDto> list, String message) {
+  public ListGamesResponse(List<GameItemDto> list, String message) {
     this.list = list;
     this.message = message;
   }
