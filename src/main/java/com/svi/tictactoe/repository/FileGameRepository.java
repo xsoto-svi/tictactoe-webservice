@@ -1,10 +1,10 @@
 package com.svi.tictactoe.repository;
 
-import com.svi.tictactoe.mapper.GameMoveMapper;
+import com.svi.tictactoe.mapper.GameMoveResponseDtoMapper;
+import com.svi.tictactoe.model.dto.response.GameMoveResponseDto;
 import com.svi.tictactoe.model.entity.GameMove;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -28,7 +28,7 @@ public class FileGameRepository {
 
     String line = String.format("%s,%s,%s,%d,%s%n",
             move.getGameId(),
-            move.getPlayerId(),
+            move.getPlayerName(),
             move.getSymbol(),
             move.getLocation(),
             move.getDateSave()
@@ -42,19 +42,18 @@ public class FileGameRepository {
               StandardOpenOption.APPEND
       );
 
-      addGameIdToPlayer(move.getGameId(), move.getPlayerId());
+      addGameIdToPlayer(move.getGameId(), move.getPlayerName());
 
     } catch (IOException exception) {
       throw new RuntimeException("Failed to save game move to file", exception);
     }
   }
 
-  /* Updates player game id list if the game id is new */
-  private void addGameIdToPlayer(UUID gameId, UUID playerId) {
-    String playerIdString = playerId.toString();
-    Path playerPath = Paths.get(PLAYERS_DIR, playerIdString + ".txt");
+  /* UTIL FUNCTION: Updates player game id list if the game id is new */
+  private void addGameIdToPlayer(UUID gameId, String playerName) {
+    Path playerPath = Paths.get(PLAYERS_DIR, playerName + ".txt");
 
-    List<UUID> existingGames = getGamesByPlayer(playerId);
+    List<UUID> existingGames = getGamesByPlayerName(playerName);
     if (existingGames.contains(gameId)) {
       return;
     }
@@ -72,8 +71,8 @@ public class FileGameRepository {
     }
   }
 
-  public List<UUID> getGamesByPlayer(UUID id) {
-    Path filePath = Paths.get(PLAYERS_DIR, id.toString() + ".txt");
+  public List<UUID> getGamesByPlayerName(String name) {
+    Path filePath = Paths.get(PLAYERS_DIR, name + ".txt");
 
     if (!Files.exists(filePath)) {
       return new ArrayList<>();
@@ -88,11 +87,11 @@ public class FileGameRepository {
               .map(UUID::fromString)
               .collect(Collectors.toList());
     } catch (IOException e) {
-      throw new RuntimeException("Failed to read game list for player: " + id, e);
+      throw new RuntimeException("Failed to read game list for player: " + name, e);
     }
   }
 
-  public List<GameMove> getGameDetailsByGameId(UUID id) {
+  public List<GameMoveResponseDto> getGameDetailsByGameId(UUID id) {
     Path filePath = Paths.get(GAMES_DIR, id.toString() + ".txt");
 
     if (!Files.exists(filePath)) {
@@ -105,7 +104,7 @@ public class FileGameRepository {
       return gameDetailStrings.stream()
               .filter(line -> line != null && !line.trim().isEmpty())
               .map(String::trim)
-              .map(GameMoveMapper::fromFileString)
+              .map(GameMoveResponseDtoMapper::fromFileString)
               .collect(Collectors.toList());
 
     } catch (IOException e) {
