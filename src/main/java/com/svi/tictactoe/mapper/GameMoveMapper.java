@@ -11,26 +11,13 @@ public class GameMoveMapper {
 
     try{
       move.setGameId(UUID.fromString(dto.getGameId()));
-      move.setPlayerId(UUID.fromString(dto.getPlayerId()));
+      move.setPlayerId(dto.getPlayerName());
       move.setSymbol(dto.getSymbol());
       move.setLocation(dto.getLocation());
       move.setDateSave(LocalDateTime.now());
     } catch (IllegalArgumentException e) {
       throw new RuntimeException("Invalid UUID format for gameId: " + dto.getGameId());
     }
-
-    return move;
-  }
-
-  public static GameMove fromFileString(String line) {
-    String[] parts = line.split(",");
-
-    GameMove move = new GameMove();
-    move.setGameId(UUID.fromString(parts[0]));
-    move.setPlayerId(UUID.fromString(parts[1]));
-    move.setSymbol(parts[2]);
-    move.setLocation(Integer.parseInt(parts[3]));
-    move.setDateSave(LocalDateTime.parse(parts[4]));
 
     return move;
   }
