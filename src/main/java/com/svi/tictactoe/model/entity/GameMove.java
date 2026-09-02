@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public class GameMove {
   private UUID gameId;
-  private UUID playerId;
+  private String playerName;
   private String symbol;
   private int location;
   private LocalDateTime dateSave;
@@ -18,12 +18,12 @@ public class GameMove {
     this.gameId = gameId;
   }
 
-  public UUID getPlayerId() {
-    return playerId;
+  public String getPlayerName() {
+    return playerName;
   }
 
-  public void setPlayerId(UUID playerId) {
-    this.playerId = playerId;
+  public void setPlayerName(String playerName) {
+    this.playerName = playerName;
   }
 
   public String getSymbol() {

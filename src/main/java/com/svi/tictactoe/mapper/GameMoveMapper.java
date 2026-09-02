@@ -11,7 +11,7 @@ public class GameMoveMapper {
 
     try{
       move.setGameId(UUID.fromString(dto.getGameId()));
-      move.setPlayerId(dto.getPlayerName());
+      move.setPlayerName(dto.getPlayerName());
       move.setSymbol(dto.getSymbol());
       move.setLocation(dto.getLocation());
       move.setDateSave(LocalDateTime.now());
