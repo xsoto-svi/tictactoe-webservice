@@ -23,7 +23,7 @@ public class TicTacToeResource {
   private TicTacToeService ticTacToeService;
 
   @GET
-  @Path("/health")
+  @Path("health")
   public Response checkHealth() {
     return Response.ok()
             .type(MediaType.APPLICATION_JSON)
@@ -32,17 +32,17 @@ public class TicTacToeResource {
   }
 
   @POST
-  @Path("/save")
+  @Path("save")
   public Response saveMove(@Valid MoveRequestDto moveDto) {
     GameMoveResponseDto savedMove = ticTacToeService.saveMove(moveDto);
     return Response.ok()
-            .entity(new SaveMoveResponse(savedMove, "Successfully saved move"))
+            .entity(new SaveMoveResponse(savedMove, "Record saved"))
             .build();
   }
 
   @GET
-  @Path("/list-games/{playerId}")
-  public Response getGamesByPlayerId(@PathParam("playerId") String playerName) {
+  @Path("list-games/{playerName}")
+  public Response getGamesByPlayerId(@PathParam("playerName") String playerName) {
     List<UUID> gameUUIDList = ticTacToeService.getGamesByPlayerName(playerName);
 
     List<ListGamesResponse.GameItemDto> gameItemList = gameUUIDList.stream()
@@ -63,7 +63,7 @@ public class TicTacToeResource {
   }
 
   @GET
-  @Path("/game/{gameId}")
+  @Path("game/{gameId}")
   public Response getGameDetailsByGameId(@PathParam("gameId") UUID gameId) {
     List<GameMoveResponseDto> gameDetailsList = ticTacToeService.getGameDetailsByGameId(gameId);
 
