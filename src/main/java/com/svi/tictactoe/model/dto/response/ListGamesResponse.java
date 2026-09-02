@@ -1,6 +1,7 @@
 package com.svi.tictactoe.model.dto.response;
 
 import java.util.List;
+import java.util.UUID;
 
 public class ListGamesResponseDto {
   private List<GameItemDto> list;
@@ -12,18 +13,14 @@ public class ListGamesResponseDto {
   }
 
   public static class GameItemDto {
-    private String id;
+    private final UUID id;
 
-    public GameItemDto(String id) {
+    public GameItemDto(UUID id) {
       this.id = id;
     }
 
-    public String getId() {
+    public UUID getId() {
       return id;
-    }
-
-    public void setId(String id) {
-      this.id = id;
     }
   }
 
