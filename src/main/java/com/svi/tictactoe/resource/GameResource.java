@@ -39,7 +39,7 @@ public class GameResource {
   }
 
   @GET
-  @Path("game/{playerName}")
+  @Path("player/{playerName}/games")
   public Response getGamesByPlayerId(@PathParam("playerName") String playerName) {
     List<UUID> gameUUIDList = gameService.getGamesByPlayerName(playerName);
 
