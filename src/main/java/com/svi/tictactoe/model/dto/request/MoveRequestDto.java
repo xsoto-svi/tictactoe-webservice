@@ -9,7 +9,7 @@ public class MoveRequestDto {
 
   @NotNull(message = "Game ID cannot be blank")
   @Pattern(
-          regexp = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+          regexp = "^[A-Z0-9]{4}R*_[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
           message = "Invalid UUID format for gameId."
   )
   @JsonbProperty("gameid")

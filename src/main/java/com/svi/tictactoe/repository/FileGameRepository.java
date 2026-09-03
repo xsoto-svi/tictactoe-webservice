@@ -81,10 +81,7 @@ public class FileGameRepository {
 
   /* UTIL FUNCTION: Associates created games to a specific room code */
   private void addGameIdToRoomCode(String roomCode, UUID gameId) {
-    //On rematch, roomCode gets appended with "R" every time a new match starts
-    String baseRoomCode = roomCode.length() >= 4 ? roomCode.substring(0, 4) : roomCode;
-
-    Path roomPath = Paths.get(ROOMS_DIR, baseRoomCode + ".txt");
+    Path roomPath = Paths.get(ROOMS_DIR, roomCode + ".txt");
 
     List<UUID> existingGames = getGamesByRoomCode(roomCode);
     if (existingGames.contains(gameId)) {
@@ -105,10 +102,7 @@ public class FileGameRepository {
   }
 
   private List<UUID> getGamesByRoomCode(String roomCode) {
-    //On rematch, roomCode gets appended with "R" every time a new match starts
-    String baseRoomCode = roomCode.length() >= 4 ? roomCode.substring(0, 4) : roomCode;
-
-    Path filePath = Paths.get(ROOMS_DIR, baseRoomCode + ".txt");
+    Path filePath = Paths.get(ROOMS_DIR, roomCode + ".txt");
 
     if (!Files.exists(filePath)) {
       return new ArrayList<>();

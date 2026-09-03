@@ -19,8 +19,16 @@ public class GameService {
   private FileGameRepository fileGameRepository;
 
   public GameMoveResponseDto saveMove(MoveRequestDto moveRequestDto) {
+    String[] gameInfo = moveRequestDto.getGameId().split("_");
+    String rawRoomCode = gameInfo[0];
+    String gameUuid = gameInfo[1];
+
+    //On rematch, roomCode gets appended with "R" every time a new match starts
+    String baseRoomCode = rawRoomCode.length() >= 4 ? rawRoomCode.substring(0, 4) : rawRoomCode;
+    moveRequestDto.setGameId(gameUuid);
+
     GameMove move = GameMoveMapper.toEntity(moveRequestDto);
-    GameMove savedMove = fileGameRepository.saveMoveOnTxtFile(move);
+    GameMove savedMove = fileGameRepository.saveMoveOnTxtFile(baseRoomCode, move);
 
     return GameMoveResponseDtoMapper.toDto(savedMove);
   }
