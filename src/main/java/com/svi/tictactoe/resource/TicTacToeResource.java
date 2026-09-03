@@ -30,7 +30,9 @@ public class TicTacToeResource {
   }
 
   @POST
-  @Path("save")
+
+  @POST
+  @Path("game/save")
   public Response saveMove(@Valid MoveRequestDto moveDto) {
     GameMoveResponseDto savedMove = ticTacToeService.saveMove(moveDto);
     return Response.ok()
@@ -39,7 +41,7 @@ public class TicTacToeResource {
   }
 
   @GET
-  @Path("list-games/{playerName}")
+  @Path("game/{playerName}")
   public Response getGamesByPlayerId(@PathParam("playerName") String playerName) {
     List<UUID> gameUUIDList = ticTacToeService.getGamesByPlayerName(playerName);
 
