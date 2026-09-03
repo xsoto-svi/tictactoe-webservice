@@ -5,7 +5,6 @@ import com.svi.tictactoe.model.dto.response.*;
 import com.svi.tictactoe.service.TicTacToeService;
 
 import javax.inject.Inject;
-import javax.print.attribute.standard.Media;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -26,7 +25,6 @@ public class TicTacToeResource {
   @Path("health")
   public Response checkHealth() {
     return Response.ok()
-            .type(MediaType.APPLICATION_JSON)
             .entity(new ApiResponse("Server is running."))
             .build();
   }
@@ -51,13 +49,11 @@ public class TicTacToeResource {
 
     if (gameItemList.isEmpty()) {
       return Response.ok()
-              .type(MediaType.APPLICATION_JSON)
               .entity(new ListGamesResponse(gameItemList, "No records found."))
               .build();
     }
 
     return Response.ok()
-            .type(MediaType.APPLICATION_JSON)
             .entity(new ListGamesResponse(gameItemList, "Records found."))
             .build();
   }
@@ -69,13 +65,11 @@ public class TicTacToeResource {
 
     if (gameDetailsList.isEmpty()) {
       return Response.ok()
-              .type(MediaType.APPLICATION_JSON)
               .entity(new GameDetailsResponse(gameDetailsList, "No records found"))
               .build();
     }
 
     return Response.ok()
-            .type(MediaType.APPLICATION_JSON)
             .entity(new GameDetailsResponse(gameDetailsList, "Records found."))
             .build();
   }
