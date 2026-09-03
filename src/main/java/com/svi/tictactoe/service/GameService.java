@@ -1,9 +1,10 @@
 package com.svi.tictactoe.service;
 
+import com.svi.tictactoe.exceptions.InvalidMoveException;
 import com.svi.tictactoe.mapper.GameMoveMapper;
 import com.svi.tictactoe.mapper.GameMoveResponseDtoMapper;
 import com.svi.tictactoe.model.dto.request.MoveRequestDto;
-import com.svi.tictactoe.model.dto.response.GameMoveResponseDto;
+import com.svi.tictactoe.model.dto.response.GameMoveDto;
 import com.svi.tictactoe.model.entity.GameMove;
 import com.svi.tictactoe.repository.FileGameRepository;
 
@@ -18,7 +19,7 @@ public class GameService {
   @Inject
   private FileGameRepository fileGameRepository;
 
-  public GameMoveResponseDto saveMove(MoveRequestDto moveRequestDto) {
+  public GameMoveDto saveMove(MoveRequestDto moveRequestDto) {
     String[] gameInfo = moveRequestDto.getGameId().split("_");
     String rawRoomCode = gameInfo[0];
     String gameUuid = gameInfo[1];
@@ -27,16 +28,36 @@ public class GameService {
     String baseRoomCode = rawRoomCode.length() >= 4 ? rawRoomCode.substring(0, 4) : rawRoomCode;
 
     GameMove move = GameMoveMapper.toEntity(moveRequestDto, gameUuid);
+    if (!isMoveValid(move)) {
+      throw new InvalidMoveException("Location " + move.getLocation() + " is already occupied");
+    }
+
     GameMove savedMove = fileGameRepository.saveMoveOnTxtFile(baseRoomCode, move);
 
     return GameMoveResponseDtoMapper.toDto(savedMove);
+  }
+
+  private boolean isMoveValid(GameMove newMove) {
+    UUID gameId = newMove.getGameId();
+    List<GameMoveDto> gameMoves = getGameDetailsByGameId(gameId);
+
+    for (GameMoveDto gameMove : gameMoves) {
+      int currLocation = gameMove.getLocation();
+      int newMoveLocation = newMove.getLocation();
+
+      if (currLocation == newMoveLocation) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   public List<UUID> getGamesByPlayerName(String name) {
     return fileGameRepository.getGamesByPlayerName(name);
   }
 
-  public List<GameMoveResponseDto> getGameDetailsByGameId(UUID id) {
+  public List<GameMoveDto> getGameDetailsByGameId(UUID id) {
     return fileGameRepository.getGameDetailsByGameId(id);
   }
 }
