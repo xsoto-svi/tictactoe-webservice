@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @ApplicationScoped
-public class TicTacToeService {
+public class GameService {
 
   @Inject
   private FileGameRepository fileGameRepository;

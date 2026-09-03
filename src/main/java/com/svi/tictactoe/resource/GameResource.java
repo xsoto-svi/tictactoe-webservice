@@ -2,7 +2,7 @@ package com.svi.tictactoe.resource;
 
 import com.svi.tictactoe.model.dto.request.MoveRequestDto;
 import com.svi.tictactoe.model.dto.response.*;
-import com.svi.tictactoe.service.TicTacToeService;
+import com.svi.tictactoe.service.GameService;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
 @Path("")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class TicTacToeResource {
+public class GameResource {
 
   @Inject
-  private TicTacToeService ticTacToeService;
+  private GameService gameService;
 
   @GET
   @Path("health")
@@ -30,11 +30,9 @@ public class TicTacToeResource {
   }
 
   @POST
-
-  @POST
   @Path("game/save")
   public Response saveMove(@Valid MoveRequestDto moveDto) {
-    GameMoveResponseDto savedMove = ticTacToeService.saveMove(moveDto);
+    GameMoveResponseDto savedMove = gameService.saveMove(moveDto);
     return Response.ok()
             .entity(new SaveMoveResponse(savedMove, "Record saved"))
             .build();
@@ -43,7 +41,7 @@ public class TicTacToeResource {
   @GET
   @Path("game/{playerName}")
   public Response getGamesByPlayerId(@PathParam("playerName") String playerName) {
-    List<UUID> gameUUIDList = ticTacToeService.getGamesByPlayerName(playerName);
+    List<UUID> gameUUIDList = gameService.getGamesByPlayerName(playerName);
 
     List<ListGamesResponse.GameItemDto> gameItemList = gameUUIDList.stream()
             .map(ListGamesResponse.GameItemDto::new)
@@ -63,7 +61,7 @@ public class TicTacToeResource {
   @GET
   @Path("game/{gameId}")
   public Response getGameDetailsByGameId(@PathParam("gameId") UUID gameId) {
-    List<GameMoveResponseDto> gameDetailsList = ticTacToeService.getGameDetailsByGameId(gameId);
+    List<GameMoveResponseDto> gameDetailsList = gameService.getGameDetailsByGameId(gameId);
 
     if (gameDetailsList.isEmpty()) {
       return Response.ok()
