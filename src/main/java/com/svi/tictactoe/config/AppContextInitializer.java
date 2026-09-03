@@ -15,8 +15,10 @@ public class AppContextInitializer implements ServletContextListener {
 
   private static final Logger LOGGER = Logger.getLogger(AppContextInitializer.class.getName());
 
-  private static final String GAMES_DIR = "data/games";
-  private static final String PLAYERS_DIR = "data/players";
+  public static final String GAMES_DIR = "data/games";
+  public static final String PLAYERS_DIR = "data/players";
+  public static final String ROOMS_DIR = "data/rooms";
+
 
   private ServletContext context;
 

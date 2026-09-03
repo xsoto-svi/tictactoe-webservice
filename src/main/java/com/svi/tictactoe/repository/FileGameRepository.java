@@ -1,16 +1,20 @@
 package com.svi.tictactoe.repository;
 
+import com.svi.tictactoe.config.AppContextInitializer;
+import com.svi.tictactoe.exceptions.ApiException;
 import com.svi.tictactoe.mapper.GameMoveResponseDtoMapper;
 import com.svi.tictactoe.model.dto.response.GameMoveResponseDto;
 import com.svi.tictactoe.model.entity.GameMove;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.ws.rs.NotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -19,10 +23,11 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class FileGameRepository {
 
-  private static final String GAMES_DIR = "data/games";
-  private static final String PLAYERS_DIR = "data/players";
+  private static final String GAMES_DIR = AppContextInitializer.GAMES_DIR;
+  private static final String PLAYERS_DIR = AppContextInitializer.PLAYERS_DIR;
+  private static final String ROOMS_DIR = AppContextInitializer.ROOMS_DIR;
 
-  public GameMove saveMoveOnTxtFile(GameMove move) {
+  public GameMove saveMoveOnTxtFile(String roomCode, GameMove move) {
     String gameIdString = move.getGameId().toString();
     Path gamesPath = Paths.get(GAMES_DIR, gameIdString + ".txt");
 
@@ -43,6 +48,7 @@ public class FileGameRepository {
       );
 
       addGameIdToPlayer(move.getGameId(), move.getPlayerName());
+      addGameIdToRoomCode(roomCode, move.getGameId());
 
       return move;
 
@@ -71,6 +77,54 @@ public class FileGameRepository {
     } catch (IOException exception) {
       throw new RuntimeException("Failed to update player games list", exception);
     }
+  }
+
+  /* UTIL FUNCTION: Associates created games to a specific room code */
+  private void addGameIdToRoomCode(String roomCode, UUID gameId) {
+    //On rematch, roomCode gets appended with "R" every time a new match starts
+    String baseRoomCode = roomCode.length() >= 4 ? roomCode.substring(0, 4) : roomCode;
+
+    Path roomPath = Paths.get(ROOMS_DIR, baseRoomCode + ".txt");
+
+    List<UUID> existingGames = getGamesByRoomCode(roomCode);
+    if (existingGames.contains(gameId)) {
+      return;
+    }
+
+    String line = gameId + System.lineSeparator();
+    try {
+      Files.write(
+              roomPath,
+              line.getBytes(StandardCharsets.UTF_8),
+              StandardOpenOption.CREATE,
+              StandardOpenOption.APPEND
+      );
+    } catch (IOException exception) {
+      throw new RuntimeException("Failed to update room games list", exception);
+    }
+  }
+
+  private List<UUID> getGamesByRoomCode(String roomCode) {
+    //On rematch, roomCode gets appended with "R" every time a new match starts
+    String baseRoomCode = roomCode.length() >= 4 ? roomCode.substring(0, 4) : roomCode;
+
+    Path filePath = Paths.get(ROOMS_DIR, baseRoomCode + ".txt");
+
+    if (!Files.exists(filePath)) {
+      return new ArrayList<>();
+    }
+
+    try {
+      List<String> lines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
+      return lines.stream()
+              .filter(line -> line != null && !line.trim().isEmpty())
+              .map(String::trim)
+              .map(UUID::fromString)
+              .collect(Collectors.toList());
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to read games for room: " + roomCode, e);
+    }
+
   }
 
   public List<UUID> getGamesByPlayerName(String name) {
