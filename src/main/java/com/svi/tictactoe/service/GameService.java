@@ -25,9 +25,8 @@ public class GameService {
 
     //On rematch, roomCode gets appended with "R" every time a new match starts
     String baseRoomCode = rawRoomCode.length() >= 4 ? rawRoomCode.substring(0, 4) : rawRoomCode;
-    moveRequestDto.setGameId(gameUuid);
 
-    GameMove move = GameMoveMapper.toEntity(moveRequestDto);
+    GameMove move = GameMoveMapper.toEntity(moveRequestDto, gameUuid);
     GameMove savedMove = fileGameRepository.saveMoveOnTxtFile(baseRoomCode, move);
 
     return GameMoveResponseDtoMapper.toDto(savedMove);

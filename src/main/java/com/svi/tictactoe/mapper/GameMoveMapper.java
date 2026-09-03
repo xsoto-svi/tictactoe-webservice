@@ -6,11 +6,11 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class GameMoveMapper {
-  public static GameMove toEntity(MoveRequestDto dto) {
+  public static GameMove toEntity(MoveRequestDto dto, String pureGameUuid) {
     GameMove move = new GameMove();
 
     try{
-      move.setGameId(UUID.fromString(dto.getGameId()));
+      move.setGameId(UUID.fromString(pureGameUuid));
       move.setPlayerName(dto.getPlayerName());
       move.setSymbol(dto.getSymbol());
       move.setLocation(dto.getLocation());
