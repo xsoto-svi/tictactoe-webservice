@@ -32,7 +32,7 @@ public class GameResource {
   @POST
   @Path("game/save")
   public Response saveMove(@Valid MoveRequestDto moveDto) {
-    GameMoveResponseDto savedMove = gameService.saveMove(moveDto);
+    GameMoveDto savedMove = gameService.saveMove(moveDto);
     return Response.ok()
             .entity(new SaveMoveResponse(savedMove, "Record saved"))
             .build();
@@ -61,7 +61,7 @@ public class GameResource {
   @GET
   @Path("game/{gameId}")
   public Response getGameDetailsByGameId(@PathParam("gameId") UUID gameId) {
-    List<GameMoveResponseDto> gameDetailsList = gameService.getGameDetailsByGameId(gameId);
+    List<GameMoveDto> gameDetailsList = gameService.getGameDetailsByGameId(gameId);
 
     if (gameDetailsList.isEmpty()) {
       return Response.ok()

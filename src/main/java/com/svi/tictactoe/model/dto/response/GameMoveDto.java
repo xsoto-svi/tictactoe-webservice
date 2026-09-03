@@ -4,7 +4,7 @@ import javax.json.bind.annotation.JsonbProperty;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public class GameMoveResponseDto {
+public class GameMoveDto {
   @JsonbProperty("gameid")
   private UUID gameId;
 

@@ -1,22 +1,19 @@
 package com.svi.tictactoe.model.dto.response;
 
-import java.util.List;
-import java.util.UUID;
-
 public class SaveMoveResponse {
-  private GameMoveResponseDto gameMoveDto;
+  private GameMoveDto gameMoveDto;
   private String message;
 
-  public SaveMoveResponse(GameMoveResponseDto gameMoveDto, String message) {
+  public SaveMoveResponse(GameMoveDto gameMoveDto, String message) {
     this.gameMoveDto = gameMoveDto;
     this.message = message;
   }
 
-  public GameMoveResponseDto getGameMoveDto() {
+  public GameMoveDto getGameMoveDto() {
     return gameMoveDto;
   }
 
-  public void setGameMoveDto(GameMoveResponseDto gameMoveDto) {
+  public void setGameMoveDto(GameMoveDto gameMoveDto) {
     this.gameMoveDto = gameMoveDto;
   }
 

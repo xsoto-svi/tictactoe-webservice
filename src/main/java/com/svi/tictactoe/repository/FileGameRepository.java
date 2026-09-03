@@ -1,20 +1,17 @@
 package com.svi.tictactoe.repository;
 
 import com.svi.tictactoe.config.AppContextInitializer;
-import com.svi.tictactoe.exceptions.ApiException;
 import com.svi.tictactoe.mapper.GameMoveResponseDtoMapper;
-import com.svi.tictactoe.model.dto.response.GameMoveResponseDto;
+import com.svi.tictactoe.model.dto.response.GameMoveDto;
 import com.svi.tictactoe.model.entity.GameMove;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.NotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.sql.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -101,6 +98,7 @@ public class FileGameRepository {
     }
   }
 
+  /* UTIL FUNCTION: Gets all the games by specific room code */
   private List<UUID> getGamesByRoomCode(String roomCode) {
     Path filePath = Paths.get(ROOMS_DIR, roomCode + ".txt");
 
@@ -141,7 +139,7 @@ public class FileGameRepository {
     }
   }
 
-  public List<GameMoveResponseDto> getGameDetailsByGameId(UUID id) {
+  public List<GameMoveDto> getGameDetailsByGameId(UUID id) {
     Path filePath = Paths.get(GAMES_DIR, id.toString() + ".txt");
 
     if (!Files.exists(filePath)) {
