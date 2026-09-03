@@ -40,6 +40,12 @@ public class AppContextInitializer implements ServletContextListener {
         LOGGER.info("Successfully created directory: " + PLAYERS_DIR);
       }
 
+      Path roomsPath = Paths.get(ROOMS_DIR);
+      if (!Files.exists(roomsPath)) {
+        Files.createDirectories(roomsPath);
+        LOGGER.info("Successfully created directory: " + ROOMS_DIR);
+      }
+
     } catch (IOException e) {
       LOGGER.severe("Failed to initialize storage directories: " + e.getMessage());
       throw new RuntimeException("Application startup initialization failed", e);
