@@ -1,4 +1,9 @@
 package com.svi.tictactoe.exceptions;
 
-public class InvalidMoveException {
+import javax.ws.rs.core.Response;
+
+public class InvalidMoveException extends ApiException {
+  public InvalidMoveException(String message) {
+    super(Response.Status.BAD_REQUEST, message);
+  }
 }
