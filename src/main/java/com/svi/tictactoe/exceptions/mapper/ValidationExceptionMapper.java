@@ -1,4 +1,4 @@
-package com.svi.tictactoe.exceptions;
+package com.svi.tictactoe.exceptions.mapper;
 
 import com.svi.tictactoe.model.dto.response.ErrorResponse;
 
