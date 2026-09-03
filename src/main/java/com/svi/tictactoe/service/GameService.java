@@ -16,8 +16,12 @@ import java.util.UUID;
 @ApplicationScoped
 public class GameService {
 
+  private final FileGameRepository fileGameRepository;
+
   @Inject
-  private FileGameRepository fileGameRepository;
+  public GameService(FileGameRepository fileGameRepository) {
+    this.fileGameRepository = fileGameRepository;
+  }
 
   public GameMoveDto saveMove(MoveRequestDto moveRequestDto) {
     String[] gameInfo = moveRequestDto.getGameId().split("_");
