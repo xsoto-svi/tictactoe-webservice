@@ -9,8 +9,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Path("player")
 public class PlayerResource {
@@ -39,11 +37,11 @@ public class PlayerResource {
   @Produces(MediaType.APPLICATION_JSON)
   @Consumes(MediaType.APPLICATION_JSON)
   public Response getGamesByPlayerName(@PathParam("playerName") String playerName) {
-    List<JsonObject> gameUuidList = playerService.getGamesByPlayerName(playerName);
-    String message = gameUuidList.isEmpty() ? "No records found" : "Records found";
+    List<JsonObject> gameUuidJsonObjects = playerService.getGamesByPlayerName(playerName);
+    String message = gameUuidJsonObjects.isEmpty() ? "No records found" : "Records found";
 
     return Response.ok()
-            .entity(new ListJsonObjectResponse(message, gameUuidList))
+            .entity(new ListJsonObjectResponse(message, gameUuidJsonObjects))
             .build();
   }
 }
