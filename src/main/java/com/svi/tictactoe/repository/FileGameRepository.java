@@ -31,6 +31,10 @@ public class FileGameRepository {
     return getAllFileNames(PLAYERS_DIR);
   }
 
+  public List<String> getAllRoomCodes() {
+    return getAllFileNames(ROOMS_DIR);
+  }
+
   public GameMove saveMoveOnTxtFile(String roomCode, GameMove move) {
     String gameIdString = move.getGameId().toString();
     Path gamesPath = Paths.get(GAMES_DIR, gameIdString + ".txt");
@@ -201,7 +205,7 @@ public class FileGameRepository {
               .filter(FileUtil::isTxtFile)
               .map(path -> {
                 String name = path.getFileName().toString();
-                return  name.substring(0, name.length() - 4);
+                return name.substring(0, name.length() - 4);
               })
               .collect(Collectors.toList());
     } catch (IOException e) {

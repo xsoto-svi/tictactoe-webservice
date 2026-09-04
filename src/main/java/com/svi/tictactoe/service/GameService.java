@@ -62,14 +62,6 @@ public class GameService {
     return true;
   }
 
-  public List<JsonObject> getGamesByRoomCode(String roomCode) {
-    return fileGameRepository.getAllGamesByRoomCode(roomCode).stream()
-            .map(id -> Json.createObjectBuilder()
-                    .add("id", id.toString())
-                    .build())
-            .collect(Collectors.toList());
-  }
-
   public List<GameMoveDto> getGameDetailsByGameId(UUID id) {
     return fileGameRepository.getGameDetailsByGameId(id);
   }

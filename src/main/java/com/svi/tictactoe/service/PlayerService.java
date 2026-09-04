@@ -1,11 +1,4 @@
 package com.svi.tictactoe.service;
-
-import com.svi.tictactoe.exceptions.InvalidMoveException;
-import com.svi.tictactoe.mapper.GameMoveMapper;
-import com.svi.tictactoe.mapper.GameMoveResponseDtoMapper;
-import com.svi.tictactoe.model.dto.request.MoveRequestDto;
-import com.svi.tictactoe.model.dto.response.GameMoveDto;
-import com.svi.tictactoe.model.entity.GameMove;
 import com.svi.tictactoe.repository.FileGameRepository;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -13,7 +6,6 @@ import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @ApplicationScoped

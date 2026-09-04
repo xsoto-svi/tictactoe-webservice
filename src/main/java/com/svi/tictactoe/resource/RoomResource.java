@@ -1,8 +1,7 @@
 package com.svi.tictactoe.resource;
 
 import com.svi.tictactoe.model.dto.response.ListJsonObjectResponse;
-import com.svi.tictactoe.service.GameService;
-import com.svi.tictactoe.service.PlayerService;
+import com.svi.tictactoe.service.RoomService;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
@@ -14,18 +13,30 @@ import java.util.List;
 @Path("room")
 public class RoomResource {
 
-  private final GameService gameService;
+  private final RoomService roomService;
 
   @Inject
-  public RoomResource(GameService gameService) {
-    this.gameService = gameService;
+  public RoomResource(RoomService roomService) {
+    this.roomService = roomService;
+  }
+
+  @GET
+  @Path("all")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response getAllRoomCodes() {
+    List<JsonObject> roomCodeJsonObjects = roomService.getAllRoomCodes();
+    String message = roomCodeJsonObjects.isEmpty() ? "No records found" : "Records found";
+
+    return Response.ok()
+            .entity(new ListJsonObjectResponse(message, roomCodeJsonObjects))
+            .build();
   }
 
   @GET
   @Path("{roomCode}")
   @Produces(MediaType.APPLICATION_JSON)
   public Response getGamesByRoomCode(@PathParam("roomCode") String roomCode) {
-    List<JsonObject> gameUuidJsonObjects = gameService.getGamesByRoomCode(roomCode);
+    List<JsonObject> gameUuidJsonObjects = roomService.getGamesByRoomCode(roomCode);
     String message = gameUuidJsonObjects.isEmpty() ? "No records found" : "Records found";
 
     return Response.ok()
