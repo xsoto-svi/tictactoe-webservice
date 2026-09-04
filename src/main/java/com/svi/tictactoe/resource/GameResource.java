@@ -5,6 +5,7 @@ import com.svi.tictactoe.model.dto.response.*;
 import com.svi.tictactoe.service.GameService;
 
 import javax.inject.Inject;
+import javax.json.JsonObject;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -57,6 +58,18 @@ public class GameResource {
 
     return Response.ok()
             .entity(new GameDetailsResponse(gameDetailsList, "Records found."))
+            .build();
+  }
+
+  @GET
+  @Path("{roomCode}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response getGamesByRoomCode(@PathParam("roomCode") String roomCode) {
+    List<JsonObject> gameUuidJsonObjects = gameService.getGamesByRoomCode(roomCode);
+    String message = gameUuidJsonObjects.isEmpty() ? "No records found" : "Records found";
+
+    return Response.ok()
+            .entity(new ListJsonObjectResponse(message, gameUuidJsonObjects))
             .build();
   }
 }

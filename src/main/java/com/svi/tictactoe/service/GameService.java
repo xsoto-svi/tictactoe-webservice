@@ -10,8 +10,11 @@ import com.svi.tictactoe.repository.FileGameRepository;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonObject;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class GameService {
@@ -57,8 +60,12 @@ public class GameService {
     return true;
   }
 
-  public List<UUID> getGamesByPlayerName(String name) {
-    return fileGameRepository.getGamesByPlayerName(name);
+  public List<JsonObject> getGamesByRoomCode(String roomCode) {
+    return fileGameRepository.getAllGamesByRoomCode(roomCode).stream()
+            .map(id -> Json.createObjectBuilder()
+                    .add("id", id.toString())
+                    .build())
+            .collect(Collectors.toList());
   }
 
   public List<GameMoveDto> getGameDetailsByGameId(UUID id) {

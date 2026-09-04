@@ -31,10 +31,6 @@ public class FileGameRepository {
     return getAllFileNames(PLAYERS_DIR);
   }
 
-  public List<String> getAllGames() {
-    return getAllFileNames(GAMES_DIR);
-  }
-
   public GameMove saveMoveOnTxtFile(String roomCode, GameMove move) {
     String gameIdString = move.getGameId().toString();
     Path gamesPath = Paths.get(GAMES_DIR, gameIdString + ".txt");
@@ -103,6 +99,27 @@ public class FileGameRepository {
 
     } catch (IOException e) {
       throw new RuntimeException("Failed to read game list for player: " + id, e);
+    }
+  }
+
+  public List<UUID> getAllGamesByRoomCode(String roomCode) {
+    Path filePath = Paths.get(ROOMS_DIR, roomCode + ".txt");
+
+    if (!Files.exists(filePath)) {
+      return new ArrayList<>();
+    }
+
+    try {
+      List<String> gameIdStrings = Files.readAllLines(filePath, StandardCharsets.UTF_8);
+
+      return gameIdStrings.stream()
+              .filter(line -> line != null && !line.trim().isEmpty())
+              .map(String::trim)
+              .map(UUID::fromString)
+              .collect(Collectors.toList());
+
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to read game list for room: " + roomCode, e);
     }
   }
 
