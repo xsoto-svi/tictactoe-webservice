@@ -60,16 +60,4 @@ public class GameResource {
             .entity(new GameDetailsResponse(gameDetailsList, "Records found."))
             .build();
   }
-
-  @GET
-  @Path("{roomCode}")
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response getGamesByRoomCode(@PathParam("roomCode") String roomCode) {
-    List<JsonObject> gameUuidJsonObjects = gameService.getGamesByRoomCode(roomCode);
-    String message = gameUuidJsonObjects.isEmpty() ? "No records found" : "Records found";
-
-    return Response.ok()
-            .entity(new ListJsonObjectResponse(message, gameUuidJsonObjects))
-            .build();
-  }
 }
