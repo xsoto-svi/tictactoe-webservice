@@ -19,7 +19,9 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class PlayerService {
 
-  private final FileGameRepository fileGameRepository;
+  private FileGameRepository fileGameRepository;
+
+  public PlayerService() {}
 
   @Inject
   public PlayerService(FileGameRepository fileGameRepository) {
