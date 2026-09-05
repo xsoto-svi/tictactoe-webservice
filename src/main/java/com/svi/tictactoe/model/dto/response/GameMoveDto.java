@@ -8,7 +8,7 @@ public class GameMoveDto {
   @JsonbProperty("gameid")
   private UUID gameId;
 
-  @JsonbProperty("playerid")
+  @JsonbProperty("playername")
   private String playerName;
 
   @JsonbProperty("symbol")
