@@ -1,5 +1,5 @@
 <component name="ArtifactManager">
-  <artifact type="war" name="tictactoe-webservice">
+  <artifact type="war" build-on-make="true" name="tictactoe-webservice">
     <output-path>$PROJECT_DIR$/out/artifacts/tictactoe_webservice</output-path>
     <root id="archive" name="tictactoe-webservice.war" />
   </artifact>

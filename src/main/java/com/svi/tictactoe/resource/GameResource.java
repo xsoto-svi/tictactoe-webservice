@@ -5,6 +5,7 @@ import com.svi.tictactoe.model.dto.response.*;
 import com.svi.tictactoe.service.GameService;
 
 import javax.inject.Inject;
+import javax.json.Json;
 import javax.json.JsonObject;
 import javax.validation.Valid;
 import javax.ws.rs.*;
@@ -33,15 +34,6 @@ public class GameResource {
             .build();
   }
 
-  @GET
-  @Path("generate")
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response generateGameId() {
-    return Response.ok()
-            .entity(new GameIdResponse("Successfully generated game id", gameService.generateGameId()))
-            .build();
-  }
-
   @POST
   @Path("save")
   @Produces(MediaType.APPLICATION_JSON)
@@ -67,6 +59,28 @@ public class GameResource {
 
     return Response.ok()
             .entity(new GameDetailsResponse(gameDetailsList, "Records found."))
+            .build();
+  }
+
+  @GET
+  @Path("/create/{roomcode}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response createPendingGame(@PathParam("roomcode") String roomCode) {
+    String gameIdString = gameService.createPendingGame(roomCode);
+
+    return Response.ok()
+            .entity(new GameIdResponse("Successfully generated game id", gameIdString))
+            .build();
+  }
+
+  @GET
+  @Path("get-pending")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response getPendingGames() {
+    List<JsonObject> pendingGames = gameService.getPendingGames();
+
+    return Response.ok()
+            .entity(new ListJsonObjectResponse("Records found", pendingGames))
             .build();
   }
 }

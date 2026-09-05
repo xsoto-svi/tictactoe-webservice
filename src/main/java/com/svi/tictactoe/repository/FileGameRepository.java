@@ -26,13 +26,35 @@ public class FileGameRepository {
   private static final String GAMES_DIR = AppContextInitializer.GAMES_DIR;
   private static final String PLAYERS_DIR = AppContextInitializer.PLAYERS_DIR;
   private static final String ROOMS_DIR = AppContextInitializer.ROOMS_DIR;
+  private static final String PENDING_DIR = AppContextInitializer.PENDING_DIR;
 
-  public List<String> getAllPlayerNames() {
-    return getAllFileNames(PLAYERS_DIR);
+  public List<String> getPlayerNames() {
+    return getFileNames(PLAYERS_DIR, "Failed to read players directory");
   }
 
-  public List<String> getAllRoomCodes() {
-    return getAllFileNames(ROOMS_DIR);
+  public List<String> getRoomCodes() {
+    return getFileNames(ROOMS_DIR, "Failed to read room directory");
+  }
+
+  /* Used for fetching all active rooms waiting for joiners */
+  public List<String> getPendingGames() {
+    return getFileNames(PENDING_DIR, "Failed to read 'pending' directory");
+  }
+
+  /* Used for temporary storage of created games */
+  public void createPendingGame(String gameId, String roomCode) {
+    String pendingFileName = roomCode + "_" + gameId + ".txt";
+    Path pendingPath = Paths.get(PENDING_DIR, pendingFileName);
+
+    try {
+      Files.write(
+              pendingPath,
+              new byte[0],
+              StandardOpenOption.CREATE
+      );
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to create pending game", e);
+    }
   }
 
   public GameMove saveMoveOnTxtFile(String roomCode, GameMove move) {
@@ -61,6 +83,10 @@ public class FileGameRepository {
       if (isFirstMove) {
         addGameIdToPlayer(move.getGameId(), move.getPlayerName());
         addGameIdToRoomCode(roomCode, move.getGameId());
+
+        // Destroy pending game if game already started
+        Path pendingPath = Paths.get(PENDING_DIR, roomCode + "_" + gameIdString + ".txt");
+        Files.deleteIfExists(pendingPath);
       }
 
       return move;
@@ -111,7 +137,7 @@ public class FileGameRepository {
     }
   }
 
-  public List<UUID> getAllGamesByRoomCode(String roomCode) {
+  public List<UUID> getGamesByRoomCode(String roomCode) {
     Path filePath = Paths.get(ROOMS_DIR, roomCode + ".txt");
 
     if (!Files.exists(filePath)) {
@@ -166,28 +192,8 @@ public class FileGameRepository {
     }
   }
 
-  /* HELPER FUNCTION: Gets all the games by specific room code */
-  private List<UUID> getGamesByRoomCode(String roomCode) {
-    Path filePath = Paths.get(ROOMS_DIR, roomCode + ".txt");
-
-    if (!Files.exists(filePath)) {
-      return new ArrayList<>();
-    }
-
-    try {
-      List<String> lines = Files.readAllLines(filePath, StandardCharsets.UTF_8);
-      return lines.stream()
-              .filter(line -> line != null && !line.trim().isEmpty())
-              .map(String::trim)
-              .map(UUID::fromString)
-              .collect(Collectors.toList());
-    } catch (IOException e) {
-      throw new RuntimeException("Failed to read games for room: " + roomCode, e);
-    }
-  }
-
   /* HELPER FUNCTION: returns list of file names of specified directory */
-  private List<String> getAllFileNames(String directory) {
+  private List<String> getFileNames(String directory, String errorMessage) {
     Path directoryPath = Paths.get(directory);
 
     if (!Files.exists(directoryPath)) {
@@ -204,9 +210,7 @@ public class FileGameRepository {
               })
               .collect(Collectors.toList());
     } catch (IOException e) {
-      throw new RuntimeException("Failed to read players directory", e);
+      throw new RuntimeException(errorMessage, e);
     }
   }
-
-
 }

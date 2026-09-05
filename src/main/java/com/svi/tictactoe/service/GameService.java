@@ -14,6 +14,7 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class GameService {
@@ -25,10 +26,6 @@ public class GameService {
   @Inject
   public GameService(FileGameRepository fileGameRepository) {
     this.fileGameRepository = fileGameRepository;
-  }
-
-  public String generateGameId() {
-    return UUID.randomUUID().toString();
   }
 
   public GameMoveDto saveMove(MoveRequestDto moveRequestDto) {
@@ -67,5 +64,20 @@ public class GameService {
 
   public List<GameMoveDto> getGameDetailsByGameId(UUID id) {
     return fileGameRepository.getGameDetailsByGameId(id);
+  }
+
+  public List<JsonObject> getPendingGames() {
+    return fileGameRepository.getPendingGames().stream()
+            .map(pendingGameId -> Json.createObjectBuilder()
+                    .add("id", pendingGameId)
+                    .build())
+            .collect(Collectors.toList());
+  }
+
+  public String createPendingGame(String roomCode) {
+    String gameIdString = UUID.randomUUID().toString();
+    fileGameRepository.createPendingGame(gameIdString, roomCode);
+
+    return gameIdString;
   }
 }

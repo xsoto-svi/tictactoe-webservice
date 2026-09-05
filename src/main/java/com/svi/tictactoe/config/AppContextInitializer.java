@@ -18,7 +18,7 @@ public class AppContextInitializer implements ServletContextListener {
   public static final String GAMES_DIR = "data/games";
   public static final String PLAYERS_DIR = "data/players";
   public static final String ROOMS_DIR = "data/rooms";
-
+  public static final String PENDING_DIR = "data/pending";
 
   private ServletContext context;
 
@@ -43,6 +43,12 @@ public class AppContextInitializer implements ServletContextListener {
       Path roomsPath = Paths.get(ROOMS_DIR);
       if (!Files.exists(roomsPath)) {
         Files.createDirectories(roomsPath);
+        LOGGER.info("Successfully created directory: " + ROOMS_DIR);
+      }
+
+      Path pendingPath = Paths.get(PENDING_DIR);
+      if (!Files.exists(pendingPath)) {
+        Files.createDirectories(pendingPath);
         LOGGER.info("Successfully created directory: " + ROOMS_DIR);
       }
 

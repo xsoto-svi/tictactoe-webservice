@@ -21,7 +21,7 @@ public class PlayerService {
   }
 
   public List<JsonObject> getAllPlayerNames() {
-    return fileGameRepository.getAllPlayerNames().stream()
+    return fileGameRepository.getPlayerNames().stream()
             .map(name -> Json.createObjectBuilder()
                     .add("playername", name)
                     .build())

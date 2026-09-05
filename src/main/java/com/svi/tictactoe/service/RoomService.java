@@ -21,7 +21,7 @@ public class RoomService {
   }
 
   public List<JsonObject> getAllRoomCodes() {
-    return fileGameRepository.getAllRoomCodes().stream()
+    return fileGameRepository.getRoomCodes().stream()
             .map(code -> Json.createObjectBuilder()
                     .add("roomcode", code)
                     .build())
@@ -29,12 +29,10 @@ public class RoomService {
   }
 
   public List<JsonObject> getGamesByRoomCode(String roomCode) {
-    return fileGameRepository.getAllGamesByRoomCode(roomCode).stream()
+    return fileGameRepository.getGamesByRoomCode(roomCode).stream()
             .map(id -> Json.createObjectBuilder()
                     .add("id", id.toString())
                     .build())
             .collect(Collectors.toList());
   }
-
-
 }
