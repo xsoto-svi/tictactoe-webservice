@@ -8,7 +8,7 @@ public class GameIdResponse extends ApiResponse {
     this.id = id;
   }
 
-  public String getGameId() {
+  public String getId() {
     return id;
   }
 }
