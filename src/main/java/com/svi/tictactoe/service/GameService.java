@@ -10,6 +10,8 @@ import com.svi.tictactoe.repository.FileGameRepository;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonObject;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,6 +25,10 @@ public class GameService {
   @Inject
   public GameService(FileGameRepository fileGameRepository) {
     this.fileGameRepository = fileGameRepository;
+  }
+
+  public String generateGameId() {
+    return UUID.randomUUID().toString();
   }
 
   public GameMoveDto saveMove(MoveRequestDto moveRequestDto) {

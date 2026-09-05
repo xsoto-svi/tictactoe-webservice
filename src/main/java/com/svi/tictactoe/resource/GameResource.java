@@ -33,6 +33,15 @@ public class GameResource {
             .build();
   }
 
+  @GET
+  @Path("generate")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response generateGameId() {
+    return Response.ok()
+            .entity(new GameIdResponse("Successfully generated game id", gameService.generateGameId()))
+            .build();
+  }
+
   @POST
   @Path("save")
   @Produces(MediaType.APPLICATION_JSON)
