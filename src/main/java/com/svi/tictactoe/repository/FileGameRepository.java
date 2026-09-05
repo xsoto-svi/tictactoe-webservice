@@ -39,6 +39,8 @@ public class FileGameRepository {
     String gameIdString = move.getGameId().toString();
     Path gamesPath = Paths.get(GAMES_DIR, gameIdString + ".txt");
 
+    boolean isFirstMove = !Files.exists(gamesPath);
+
     String line = String.format("%s,%s,%s,%d,%s%n",
             move.getGameId(),
             move.getPlayerName(),
@@ -55,8 +57,11 @@ public class FileGameRepository {
               StandardOpenOption.APPEND
       );
 
-      addGameIdToPlayer(move.getGameId(), move.getPlayerName());
-      addGameIdToRoomCode(roomCode, move.getGameId());
+      // Prevents multiple writes of the same gameid
+      if (isFirstMove) {
+        addGameIdToPlayer(move.getGameId(), move.getPlayerName());
+        addGameIdToRoomCode(roomCode, move.getGameId());
+      }
 
       return move;
 
@@ -127,16 +132,11 @@ public class FileGameRepository {
     }
   }
 
-  /* HELPER FUNCTION: Updates player game id list if the game id is new */
+  /* HELPER FUNCTION: Updates player game id list */
   private void addGameIdToPlayer(UUID gameId, String playerName) {
     Path playerPath = Paths.get(PLAYERS_DIR, playerName + ".txt");
-
-    List<UUID> existingGames = getGamesByPlayerName(playerName);
-    if (existingGames.contains(gameId)) {
-      return;
-    }
-
     String line = gameId + System.lineSeparator();
+
     try {
       Files.write(
               playerPath,
@@ -152,13 +152,8 @@ public class FileGameRepository {
   /* HELPER FUNCTION: Associates created games to a specific room code */
   private void addGameIdToRoomCode(String roomCode, UUID gameId) {
     Path roomPath = Paths.get(ROOMS_DIR, roomCode + ".txt");
-
-    List<UUID> existingGames = getGamesByRoomCode(roomCode);
-    if (existingGames.contains(gameId)) {
-      return;
-    }
-
     String line = gameId + System.lineSeparator();
+
     try {
       Files.write(
               roomPath,
@@ -191,7 +186,7 @@ public class FileGameRepository {
     }
   }
 
-  /* HELPER FUNCTION */
+  /* HELPER FUNCTION: returns list of file names of specified directory */
   private List<String> getAllFileNames(String directory) {
     Path directoryPath = Paths.get(directory);
 
