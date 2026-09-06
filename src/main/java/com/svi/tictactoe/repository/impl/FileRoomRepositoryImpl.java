@@ -1,6 +1,7 @@
 package com.svi.tictactoe.repository.impl;
 
 import com.svi.tictactoe.config.AppContextInitializer;
+import com.svi.tictactoe.config.Config;
 import com.svi.tictactoe.repository.RoomRepository;
 import com.svi.tictactoe.utils.FileUtil;
 
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class FileRoomRepositoryImpl implements RoomRepository {
 
-    private static final String ROOMS_DIR = AppContextInitializer.ROOMS_DIR;
+    private static final String ROOMS_DIR = Config.get(Config.Key.ROOMS_RECORDS_PATH.value());
 
     @Override
     public List<String> getRoomCodes() {

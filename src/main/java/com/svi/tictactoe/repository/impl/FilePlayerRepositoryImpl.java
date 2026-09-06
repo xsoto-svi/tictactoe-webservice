@@ -1,6 +1,7 @@
 package com.svi.tictactoe.repository.impl;
 
 import com.svi.tictactoe.config.AppContextInitializer;
+import com.svi.tictactoe.config.Config;
 import com.svi.tictactoe.repository.PlayerRepository;
 import com.svi.tictactoe.utils.FileUtil;
 
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class FilePlayerRepositoryImpl implements PlayerRepository {
 
-    private static final String PLAYERS_DIR = AppContextInitializer.PLAYERS_DIR;
+    private static final String PLAYERS_DIR = Config.get(Config.Key.PLAYER_RECORDS_PATH.value());
 
     @Override
     public List<String> getPlayerNames() {

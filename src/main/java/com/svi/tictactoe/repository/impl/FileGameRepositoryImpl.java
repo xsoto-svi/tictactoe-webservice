@@ -1,6 +1,7 @@
 package com.svi.tictactoe.repository.impl;
 
 import com.svi.tictactoe.config.AppContextInitializer;
+import com.svi.tictactoe.config.Config;
 import com.svi.tictactoe.mapper.GameMoveResponseDtoMapper;
 import com.svi.tictactoe.model.dto.response.GameMoveDto;
 import com.svi.tictactoe.model.entity.GameMove;
@@ -19,8 +20,8 @@ import java.util.stream.Stream;
 @ApplicationScoped
 public class FileGameRepositoryImpl implements GameRepository {
 
-    private static final String GAMES_DIR = AppContextInitializer.GAMES_DIR;
-    private static final String PENDING_DIR = AppContextInitializer.PENDING_DIR;
+    private static final String GAMES_DIR = Config.get(Config.Key.GAME_RECORDS_PATH.value());
+    private static final String PENDING_DIR = Config.get(Config.Key.PENDING_RECORDS_PATH.value());
 
     @Override
     public void createPendingGame(String gameId, String roomCode, String playerName) {
