@@ -2,8 +2,6 @@ package com.svi.tictactoe.service.impl;
 
 import com.svi.tictactoe.exceptions.InvalidMoveException;
 import com.svi.tictactoe.exceptions.PlayerNameAlreadyTakenException;
-import com.svi.tictactoe.mapper.GameMoveMapper;
-import com.svi.tictactoe.mapper.GameMoveResponseDtoMapper;
 import com.svi.tictactoe.model.dto.request.MoveRequestDto;
 import com.svi.tictactoe.model.dto.response.GameMoveDto;
 import com.svi.tictactoe.model.entity.GameMove;
@@ -16,6 +14,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class GameServiceImpl implements GameService {
@@ -39,35 +38,30 @@ public class GameServiceImpl implements GameService {
     String[] gameInfo = moveRequestDto.getGameId().split("_");
     String gameUuid = gameInfo[1];
 
-    GameMove move = GameMoveMapper.toEntity(moveRequestDto, gameUuid);
+    GameMove move = toEntity(moveRequestDto, gameUuid);
     if (!isMoveValid(move)) {
       throw new InvalidMoveException("Location " + move.getLocation() + " is already occupied");
     }
 
     GameMove savedMove = gameRepository.saveMoveOnTxtFile(move);
 
-    return GameMoveResponseDtoMapper.toDto(savedMove);
+    return toDto(savedMove);
   }
 
   private boolean isMoveValid(GameMove newMove) {
     UUID gameId = newMove.getGameId();
-    List<GameMoveDto> gameMoves = getGameDetailsByGameId(gameId);
+    List<GameMove> gameMoves = gameRepository.getGameDetailsByGameId(gameId);
 
-    for (GameMoveDto gameMove : gameMoves) {
-      int currLocation = gameMove.getLocation();
-      int newMoveLocation = newMove.getLocation();
-
-      if (currLocation == newMoveLocation) {
-        return false;
-      }
-    }
-
-    return true;
+    return gameMoves.stream()
+            .map(GameMove::getLocation)
+            .noneMatch(loc -> loc == newMove.getLocation());
   }
 
   @Override
   public List<GameMoveDto> getGameDetailsByGameId(UUID id) {
-    return gameRepository.getGameDetailsByGameId(id);
+    return gameRepository.getGameDetailsByGameId(id).stream()
+            .map(this::toDto)
+            .collect(Collectors.toList());
   }
 
   @Override
@@ -123,5 +117,29 @@ public class GameServiceImpl implements GameService {
 
     //On rematch, roomCode gets appended with "R" every time a new match starts
     return rawRoomCode.length() >= 4 ? rawRoomCode.substring(0, 4) : rawRoomCode;
+  }
+
+  private GameMove toEntity(MoveRequestDto dto, String pureGameUuid) {
+    GameMove move = new GameMove();
+    try {
+      move.setGameId(UUID.fromString(pureGameUuid));
+      move.setPlayerName(dto.getPlayerName());
+      move.setSymbol(dto.getSymbol());
+      move.setLocation(dto.getLocation());
+      move.setDateSave(java.time.LocalDateTime.now());
+    } catch (IllegalArgumentException e) {
+      throw new RuntimeException("Invalid UUID format for gameId: " + dto.getGameId());
+    }
+    return move;
+  }
+
+  private GameMoveDto toDto(GameMove gameMove) {
+    GameMoveDto move = new GameMoveDto();
+    move.setGameId(gameMove.getGameId());
+    move.setPlayerName(gameMove.getPlayerName());
+    move.setSymbol(gameMove.getSymbol());
+    move.setLocation(gameMove.getLocation());
+    move.setDateSaved(gameMove.getDateSave());
+    return move;
   }
 }

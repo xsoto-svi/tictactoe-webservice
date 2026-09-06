@@ -2,8 +2,6 @@ package com.svi.tictactoe.repository.impl;
 
 import com.svi.tictactoe.config.AppContextInitializer;
 import com.svi.tictactoe.config.Config;
-import com.svi.tictactoe.mapper.GameMoveResponseDtoMapper;
-import com.svi.tictactoe.model.dto.response.GameMoveDto;
 import com.svi.tictactoe.model.entity.GameMove;
 import com.svi.tictactoe.repository.GameRepository;
 
@@ -96,7 +94,7 @@ public class FileGameRepositoryImpl implements GameRepository {
     }
 
     @Override
-    public List<GameMoveDto> getGameDetailsByGameId(UUID id) {
+    public List<GameMove> getGameDetailsByGameId(UUID id) {
         Path filePath = Paths.get(GAMES_DIR, id.toString() + ".txt");
 
         if (!Files.exists(filePath)) {
@@ -109,12 +107,23 @@ public class FileGameRepositoryImpl implements GameRepository {
             return gameDetailStrings.stream()
                     .filter(line -> line != null && !line.trim().isEmpty())
                     .map(String::trim)
-                    .map(GameMoveResponseDtoMapper::fromFileString)
+                    .map(this::fromFileString)
                     .collect(Collectors.toList());
 
         } catch (IOException e) {
             throw new RuntimeException("Failed to read game list for player: " + id, e);
         }
+    }
+
+    private GameMove fromFileString(String line) {
+        String[] parts = line.split(",");
+        GameMove move = new GameMove();
+        move.setGameId(UUID.fromString(parts[0]));
+        move.setPlayerName(parts[1]);
+        move.setSymbol(parts[2]);
+        move.setLocation(Integer.parseInt(parts[3]));
+        move.setDateSave(java.time.LocalDateTime.parse(parts[4]));
+        return move;
     }
 
     @Override

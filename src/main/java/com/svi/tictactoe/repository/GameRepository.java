@@ -1,6 +1,5 @@
 package com.svi.tictactoe.repository;
 
-import com.svi.tictactoe.model.dto.response.GameMoveDto;
 import com.svi.tictactoe.model.entity.GameMove;
 
 import java.util.List;
@@ -12,6 +11,6 @@ public interface GameRepository {
     String getPendingGameCreatorName(String roomCode, String gameId);
     boolean deletePendingGame(String roomCode, String gameId);
     GameMove saveMoveOnTxtFile(GameMove move);
-    List<GameMoveDto> getGameDetailsByGameId(UUID id);
+    List<GameMove> getGameDetailsByGameId(UUID id);
 }
 
