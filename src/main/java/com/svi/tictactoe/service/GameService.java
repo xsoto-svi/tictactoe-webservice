@@ -66,12 +66,13 @@ public class GameService {
     return fileGameRepository.getGameDetailsByGameId(id);
   }
 
-  public List<JsonObject> getPendingGames() {
+  public String getPendingGameByRoomCode(String roomCode) {
+    String prefix = roomCode + "_";
+
     return fileGameRepository.getPendingGames().stream()
-            .map(pendingGameId -> Json.createObjectBuilder()
-                    .add("id", pendingGameId)
-                    .build())
-            .collect(Collectors.toList());
+              .filter(fileName -> fileName.startsWith(prefix))
+              .map(fileName -> fileName.substring(prefix.length()))
+            .findFirst().orElse(null);
   }
 
   public String createPendingGame(String roomCode) {

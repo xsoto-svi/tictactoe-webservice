@@ -69,14 +69,14 @@ public class GameResource {
   }
 
   @GET
-  @Path("pending")
+  @Path("pending/{roomcode}")
   @Produces(MediaType.APPLICATION_JSON)
-  public Response getPendingGames() {
-    List<JsonObject> pendingGames = gameService.getPendingGames();
-    String message = pendingGames.isEmpty() ? "No records found": "Records found.";
+  public Response getPendingGames(@PathParam("roomcode") String roomCode) {
+    String pendingGameId = gameService.getPendingGameByRoomCode(roomCode);
+    String message = (pendingGameId == null || pendingGameId.isEmpty()) ? "No game found": "Game found.";
 
     return Response.ok()
-            .entity(new ListJsonObjectResponse(message, pendingGames))
+            .entity(new GameIdResponse(message, pendingGameId))
             .build();
   }
 }
