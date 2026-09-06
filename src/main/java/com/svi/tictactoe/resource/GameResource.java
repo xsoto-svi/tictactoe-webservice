@@ -50,37 +50,33 @@ public class GameResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Response getGameDetailsByGameId(@PathParam("gameId") UUID gameId) {
     List<GameMoveDto> gameDetailsList = gameService.getGameDetailsByGameId(gameId);
-
-    if (gameDetailsList.isEmpty()) {
-      return Response.ok()
-              .entity(new GameDetailsResponse(gameDetailsList, "No records found"))
-              .build();
-    }
+    String message = gameDetailsList.isEmpty() ? "No records found": "Records found.";
 
     return Response.ok()
-            .entity(new GameDetailsResponse(gameDetailsList, "Records found."))
+            .entity(new GameDetailsResponse(gameDetailsList, message))
             .build();
   }
 
-  @GET
+  @POST
   @Path("/create/{roomcode}")
   @Produces(MediaType.APPLICATION_JSON)
   public Response createPendingGame(@PathParam("roomcode") String roomCode) {
     String gameIdString = gameService.createPendingGame(roomCode);
 
     return Response.ok()
-            .entity(new GameIdResponse("Successfully generated game id", gameIdString))
+            .entity(new GameIdResponse("Successfully created pending game", gameIdString))
             .build();
   }
 
   @GET
-  @Path("get-pending")
+  @Path("pending")
   @Produces(MediaType.APPLICATION_JSON)
   public Response getPendingGames() {
     List<JsonObject> pendingGames = gameService.getPendingGames();
+    String message = pendingGames.isEmpty() ? "No records found": "Records found.";
 
     return Response.ok()
-            .entity(new ListJsonObjectResponse("Records found", pendingGames))
+            .entity(new ListJsonObjectResponse(message, pendingGames))
             .build();
   }
 }
