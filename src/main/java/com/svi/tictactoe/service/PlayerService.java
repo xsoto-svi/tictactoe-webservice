@@ -1,39 +1,10 @@
 package com.svi.tictactoe.service;
-import com.svi.tictactoe.repository.FileGameRepository;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.json.Json;
 import javax.json.JsonObject;
 import java.util.List;
-import java.util.stream.Collectors;
 
-@ApplicationScoped
-public class PlayerService {
-
-  private FileGameRepository fileGameRepository;
-
-  public PlayerService() {}
-
-  @Inject
-  public PlayerService(FileGameRepository fileGameRepository) {
-    this.fileGameRepository = fileGameRepository;
-  }
-
-  public List<JsonObject> getAllPlayerNames() {
-    return fileGameRepository.getPlayerNames().stream()
-            .map(name -> Json.createObjectBuilder()
-                    .add("playername", name)
-                    .build())
-            .collect(Collectors.toList());
-  }
-
-  public List<JsonObject> getGamesByPlayerName(String name) {
-    return fileGameRepository.getGamesByPlayerName(name).stream()
-            .map(gameUuid -> Json.createObjectBuilder()
-                    .add("id", gameUuid.toString())
-                    .build())
-            .collect(Collectors.toList()
-    );
-  }
+public interface PlayerService {
+    List<JsonObject> getAllPlayerNames();
+    List<JsonObject> getGamesByPlayerName(String name);
 }
+
