@@ -1,6 +1,7 @@
 package com.svi.tictactoe.resource;
 
 import com.svi.tictactoe.model.dto.request.MoveRequestDto;
+import com.svi.tictactoe.model.dto.request.PendingGameRequestDto;
 import com.svi.tictactoe.model.dto.response.*;
 import com.svi.tictactoe.service.GameService;
 
@@ -58,21 +59,21 @@ public class GameResource {
   }
 
   @POST
-  @Path("/create/{roomcode}")
+  @Path("create")
   @Produces(MediaType.APPLICATION_JSON)
-  public Response createPendingGame(@PathParam("roomcode") String roomCode) {
-    String gameIdString = gameService.createPendingGame(roomCode);
+  public Response createPendingGame(@Valid PendingGameRequestDto pendingGameDto) {
+    String gameIdString = gameService.createPendingGame(pendingGameDto.getRoomCode(), pendingGameDto.getPlayerName());
 
     return Response.ok()
             .entity(new GameIdResponse("Successfully created pending game", gameIdString))
             .build();
   }
 
-  @GET
-  @Path("pending/{roomcode}")
+  @POST
+  @Path("pending")
   @Produces(MediaType.APPLICATION_JSON)
-  public Response getPendingGames(@PathParam("roomcode") String roomCode) {
-    String pendingGameId = gameService.getPendingGameByRoomCode(roomCode);
+  public Response joinPendingGame(@Valid PendingGameRequestDto pendingGameDto) {
+    String pendingGameId = gameService.joinPendingGame(pendingGameDto.getRoomCode(), pendingGameDto.getPlayerName());
     String message = (pendingGameId == null || pendingGameId.isEmpty()) ? "No game found": "Game found.";
 
     return Response.ok()

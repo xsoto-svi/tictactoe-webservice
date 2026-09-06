@@ -1,6 +1,8 @@
 package com.svi.tictactoe.service;
 
+import com.svi.tictactoe.exceptions.ApiException;
 import com.svi.tictactoe.exceptions.InvalidMoveException;
+import com.svi.tictactoe.exceptions.PlayerNameAlreadyTakenException;
 import com.svi.tictactoe.mapper.GameMoveMapper;
 import com.svi.tictactoe.mapper.GameMoveResponseDtoMapper;
 import com.svi.tictactoe.model.dto.request.MoveRequestDto;
@@ -66,18 +68,25 @@ public class GameService {
     return fileGameRepository.getGameDetailsByGameId(id);
   }
 
-  public String getPendingGameByRoomCode(String roomCode) {
-    String prefix = roomCode + "_";
+  public String joinPendingGame(String roomCode, String joiningPlayerName) {
+    String gameId = fileGameRepository.getPendingGameId(roomCode);
+    if (gameId == null) {
+      return null;
+    }
 
-    return fileGameRepository.getPendingGames().stream()
-              .filter(fileName -> fileName.startsWith(prefix))
-              .map(fileName -> fileName.substring(prefix.length()))
-            .findFirst().orElse(null);
+    String creatorName = fileGameRepository.getPendingGameCreatorName(roomCode, gameId);
+
+    /* Windows file system is case-insensitive */
+    if (joiningPlayerName.equalsIgnoreCase(creatorName)) {
+      throw new PlayerNameAlreadyTakenException("Player name '" + joiningPlayerName + "' is already taken in this room.");
+    }
+
+    return gameId;
   }
 
-  public String createPendingGame(String roomCode) {
+  public String createPendingGame(String roomCode, String playerName) {
     String gameIdString = UUID.randomUUID().toString();
-    fileGameRepository.createPendingGame(gameIdString, roomCode);
+    fileGameRepository.createPendingGame(gameIdString, playerName, roomCode);
 
     return gameIdString;
   }

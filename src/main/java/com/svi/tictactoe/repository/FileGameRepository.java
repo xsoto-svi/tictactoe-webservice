@@ -9,10 +9,7 @@ import com.svi.tictactoe.utils.FileUtil;
 import javax.enterprise.context.ApplicationScoped;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,24 +33,47 @@ public class FileGameRepository {
     return getFileNames(ROOMS_DIR, "Failed to read room directory");
   }
 
-  /* Used for fetching all active rooms waiting for joiners */
-  public List<String> getPendingGames() {
-    return getFileNames(PENDING_DIR, "Failed to read 'pending' directory");
-  }
-
   /* Used for temporary storage of created games */
-  public void createPendingGame(String gameId, String roomCode) {
+  public void createPendingGame(String gameId, String roomCode, String playerName) {
     String pendingFileName = roomCode + "_" + gameId + ".txt";
     Path pendingPath = Paths.get(PENDING_DIR, pendingFileName);
 
     try {
       Files.write(
               pendingPath,
-              new byte[0],
+              playerName.getBytes(StandardCharsets.UTF_8),
               StandardOpenOption.CREATE
       );
     } catch (IOException e) {
       throw new RuntimeException("Failed to create pending game", e);
+    }
+  }
+
+  /* Fetches the game id of a pending room */
+  public String getPendingGameId(String roomCode) {
+    Path pendingDir = Paths.get(PENDING_DIR);
+    if (!Files.exists(pendingDir)) return null;
+
+    try (DirectoryStream<Path> stream = Files.newDirectoryStream(pendingDir, roomCode + "_*.txt")) {
+      for (Path path : stream) {
+        String fileName = path.getFileName().toString();
+        return fileName.substring(roomCode.length() + 1, fileName.length() - 4);
+      }
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to find pending game for room: " + roomCode, e);
+    }
+    return null;
+  }
+
+  /* Fetches the name of the user that created the pending room */
+  public String getPendingGameCreatorName(String roomCode, String gameId) {
+    Path pendingPath = Paths.get(PENDING_DIR, roomCode + "_" + gameId + ".txt");
+    if (!Files.exists(pendingPath)) return null;
+
+    try (Stream<String> lines = Files.lines(pendingPath)) {
+      return lines.findFirst().orElse("");
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to read creator name for game: " + gameId, e);
     }
   }
 
@@ -159,7 +179,7 @@ public class FileGameRepository {
   }
 
   /* HELPER FUNCTION: Updates player game id list */
-  private void addGameIdToPlayer(UUID gameId, String playerName) {
+  private synchronized void addGameIdToPlayer(UUID gameId, String playerName) {
     Path playerPath = Paths.get(PLAYERS_DIR, playerName + ".txt");
     String line = gameId + System.lineSeparator();
 
@@ -176,7 +196,7 @@ public class FileGameRepository {
   }
 
   /* HELPER FUNCTION: Associates created games to a specific room code */
-  private void addGameIdToRoomCode(String roomCode, UUID gameId) {
+  private synchronized void addGameIdToRoomCode(String roomCode, UUID gameId) {
     Path roomPath = Paths.get(ROOMS_DIR, roomCode + ".txt");
     String line = gameId + System.lineSeparator();
 
