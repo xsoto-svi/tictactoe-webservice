@@ -69,12 +69,12 @@ public class GameService {
   public String joinPendingGame(String rawRoomCode, String joiningPlayerName) {
     String baseRoomCode = extractBaseRoomCode(rawRoomCode);
 
-    String gameId = fileGameRepository.getPendingGameId(roomCode);
+    String gameId = fileGameRepository.getPendingGameId(baseRoomCode);
     if (gameId == null) {
       return null;
     }
 
-    String creatorName = fileGameRepository.getPendingGameCreatorName(roomCode, gameId);
+    String creatorName = fileGameRepository.getPendingGameCreatorName(baseRoomCode, gameId);
 
     /* Windows file system is case-insensitive */
     if (joiningPlayerName.equalsIgnoreCase(creatorName)) {
@@ -101,6 +101,12 @@ public class GameService {
     fileGameRepository.createPendingGame(gameIdString, baseRoomCode, playerName);
 
     return gameIdString;
+  }
+
+  public boolean deletePendingGame(String rawRoomCode, String gameId) {
+    String baseRoomCode = extractBaseRoomCode(rawRoomCode);
+
+    return fileGameRepository.deletePendingGame(baseRoomCode, gameId);
   }
 
   /* HELPER FUNCTION: extracts room code from the complete game id and removes 'R's that signifies rematches */

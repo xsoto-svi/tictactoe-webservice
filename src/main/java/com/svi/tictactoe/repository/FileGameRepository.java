@@ -200,12 +200,12 @@ public class FileGameRepository {
     }
   }
 
-  public void deletePendingGame(String roomCode, String gameId) {
+  public boolean deletePendingGame(String roomCode, String gameId) {
     String pendingFileName = roomCode + "_" + gameId + ".txt";
 
     try {
       Path pendingPath = Paths.get(PENDING_DIR, pendingFileName);
-      Files.deleteIfExists(pendingPath);
+      return Files.deleteIfExists(pendingPath);
     } catch (IOException exception) {
       throw new RuntimeException("Failed to delete pending game: " + pendingFileName);
     }

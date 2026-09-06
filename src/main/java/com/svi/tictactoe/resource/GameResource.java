@@ -80,4 +80,18 @@ public class GameResource {
             .entity(new GameIdResponse(message, pendingGameId))
             .build();
   }
+
+  @DELETE
+  @Path("{roomCode}/pending/{gameId}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response cancelPendingGame(@PathParam("roomCode") String rawRoomCode,
+          @PathParam("gameId") String gameId) {
+
+    boolean result = gameService.deletePendingGame(rawRoomCode, gameId);
+    String message = result ? "Successfully deleted pending game" : "Failed to delete pending game";
+
+    return Response.ok()
+            .entity(new ApiResponse(message))
+            .build();
+  }
 }
