@@ -86,7 +86,7 @@ public class GameService {
 
   public String createPendingGame(String roomCode, String playerName) {
     String gameIdString = UUID.randomUUID().toString();
-    fileGameRepository.createPendingGame(gameIdString, playerName, roomCode);
+    fileGameRepository.createPendingGame(gameIdString, roomCode, playerName);
 
     return gameIdString;
   }
