@@ -14,6 +14,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -31,19 +32,16 @@ public class GameService {
   }
 
   public GameMoveDto saveMove(MoveRequestDto moveRequestDto) {
+    // Game id here is a composite id that contains <roomcode>_<gameUUID>
     String[] gameInfo = moveRequestDto.getGameId().split("_");
-    String rawRoomCode = gameInfo[0];
     String gameUuid = gameInfo[1];
-
-    //On rematch, roomCode gets appended with "R" every time a new match starts
-    String baseRoomCode = rawRoomCode.length() >= 4 ? rawRoomCode.substring(0, 4) : rawRoomCode;
 
     GameMove move = GameMoveMapper.toEntity(moveRequestDto, gameUuid);
     if (!isMoveValid(move)) {
       throw new InvalidMoveException("Location " + move.getLocation() + " is already occupied");
     }
 
-    GameMove savedMove = fileGameRepository.saveMoveOnTxtFile(baseRoomCode, move);
+    GameMove savedMove = fileGameRepository.saveMoveOnTxtFile(move);
 
     return GameMoveResponseDtoMapper.toDto(savedMove);
   }
@@ -68,7 +66,9 @@ public class GameService {
     return fileGameRepository.getGameDetailsByGameId(id);
   }
 
-  public String joinPendingGame(String roomCode, String joiningPlayerName) {
+  public String joinPendingGame(String rawRoomCode, String joiningPlayerName) {
+    String baseRoomCode = extractBaseRoomCode(rawRoomCode);
+
     String gameId = fileGameRepository.getPendingGameId(roomCode);
     if (gameId == null) {
       return null;
@@ -81,13 +81,34 @@ public class GameService {
       throw new PlayerNameAlreadyTakenException("Player name '" + joiningPlayerName + "' is already taken in this room.");
     }
 
+    // link both players to this game ID
+    fileGameRepository.addGameIdToPlayer(UUID.fromString(gameId), creatorName);
+    fileGameRepository.addGameIdToPlayer(UUID.fromString(gameId), joiningPlayerName);
+
+    // link room code to this game ID
+    fileGameRepository.addGameIdToRoomCode(baseRoomCode, UUID.fromString(gameId));
+
+    // delete pending game file since the match has officially started
+    fileGameRepository.deletePendingGame(baseRoomCode, gameId);
+
     return gameId;
   }
 
-  public String createPendingGame(String roomCode, String playerName) {
+  public String createPendingGame(String rawRoomCode, String playerName) {
+    String baseRoomCode = extractBaseRoomCode(rawRoomCode);
+
     String gameIdString = UUID.randomUUID().toString();
-    fileGameRepository.createPendingGame(gameIdString, roomCode, playerName);
+    fileGameRepository.createPendingGame(gameIdString, baseRoomCode, playerName);
 
     return gameIdString;
+  }
+
+  /* HELPER FUNCTION: extracts room code from the complete game id and removes 'R's that signifies rematches */
+  private String extractBaseRoomCode(String completeGameId) {
+    String[] gameInfo = completeGameId.split("_");
+    String rawRoomCode = gameInfo[0];
+
+    //On rematch, roomCode gets appended with "R" every time a new match starts
+    return rawRoomCode.length() >= 4 ? rawRoomCode.substring(0, 4) : rawRoomCode;
   }
 }

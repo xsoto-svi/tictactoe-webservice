@@ -77,11 +77,9 @@ public class FileGameRepository {
     }
   }
 
-  public GameMove saveMoveOnTxtFile(String roomCode, GameMove move) {
+  public GameMove saveMoveOnTxtFile(GameMove move) {
     String gameIdString = move.getGameId().toString();
     Path gamesPath = Paths.get(GAMES_DIR, gameIdString + ".txt");
-
-    boolean isFirstMove = !Files.exists(gamesPath);
 
     String line = String.format("%s,%s,%s,%d,%s%n",
             move.getGameId(),
@@ -98,16 +96,6 @@ public class FileGameRepository {
               StandardOpenOption.CREATE,
               StandardOpenOption.APPEND
       );
-
-      // Prevents multiple writes of the same gameid
-      if (isFirstMove) {
-        addGameIdToPlayer(move.getGameId(), move.getPlayerName());
-        addGameIdToRoomCode(roomCode, move.getGameId());
-
-        // Destroy pending game if game already started
-        Path pendingPath = Paths.get(PENDING_DIR, roomCode + "_" + gameIdString + ".txt");
-        Files.deleteIfExists(pendingPath);
-      }
 
       return move;
 
@@ -179,7 +167,7 @@ public class FileGameRepository {
   }
 
   /* HELPER FUNCTION: Updates player game id list */
-  private synchronized void addGameIdToPlayer(UUID gameId, String playerName) {
+  public synchronized void addGameIdToPlayer(UUID gameId, String playerName) {
     Path playerPath = Paths.get(PLAYERS_DIR, playerName + ".txt");
     String line = gameId + System.lineSeparator();
 
@@ -196,7 +184,7 @@ public class FileGameRepository {
   }
 
   /* HELPER FUNCTION: Associates created games to a specific room code */
-  private synchronized void addGameIdToRoomCode(String roomCode, UUID gameId) {
+  public synchronized void addGameIdToRoomCode(String roomCode, UUID gameId) {
     Path roomPath = Paths.get(ROOMS_DIR, roomCode + ".txt");
     String line = gameId + System.lineSeparator();
 
@@ -209,6 +197,17 @@ public class FileGameRepository {
       );
     } catch (IOException exception) {
       throw new RuntimeException("Failed to update room games list", exception);
+    }
+  }
+
+  public void deletePendingGame(String roomCode, String gameId) {
+    String pendingFileName = roomCode + "_" + gameId + ".txt";
+
+    try {
+      Path pendingPath = Paths.get(PENDING_DIR, pendingFileName);
+      Files.deleteIfExists(pendingPath);
+    } catch (IOException exception) {
+      throw new RuntimeException("Failed to delete pending game: " + pendingFileName);
     }
   }
 
