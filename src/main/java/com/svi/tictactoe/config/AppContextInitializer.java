@@ -15,16 +15,13 @@ public class AppContextInitializer implements ServletContextListener {
 
   private static final Logger LOGGER = Logger.getLogger(AppContextInitializer.class.getName());
 
-  public static final String GAMES_DIR = "data/games";
-  public static final String PLAYERS_DIR = "data/players";
-  public static final String ROOMS_DIR = "data/rooms";
-  public static final String PENDING_DIR = "data/pending";
-
-  private ServletContext context;
+  private static final String GAMES_DIR = Config.get(Config.Key.GAME_RECORDS_PATH.value());
+  private static final String PLAYERS_DIR = Config.get(Config.Key.PLAYER_RECORDS_PATH.value());
+  private static final String ROOMS_DIR = Config.get(Config.Key.ROOMS_RECORDS_PATH.value());
+  private static final String PENDING_DIR = Config.get(Config.Key.PENDING_RECORDS_PATH.value());
 
   @Override
   public void contextInitialized(ServletContextEvent sce) {
-    this.context = sce.getServletContext();
     LOGGER.info(">>> Tic-Tac-Toe Application is starting up...");
 
     try {
