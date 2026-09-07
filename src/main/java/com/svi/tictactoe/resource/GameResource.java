@@ -13,7 +13,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.UUID;
 
-@Path("game")
+@Path("games")
 public class GameResource {
 
   private final GameService gameService;
@@ -21,15 +21,6 @@ public class GameResource {
   @Inject
   public GameResource(GameService gameService) {
     this.gameService = gameService;
-  }
-
-  @GET
-  @Path("health")
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response checkHealth() {
-    return Response.ok()
-            .entity(new ApiResponse("Server is running."))
-            .build();
   }
 
   @POST
@@ -56,7 +47,7 @@ public class GameResource {
   }
 
   @POST
-  @Path("create")
+  @Path("create-pending")
   @Produces(MediaType.APPLICATION_JSON)
   public Response createPendingGame(@Valid PendingGameRequestDto pendingGameDto) {
     String gameIdString = gameService.createPendingGame(pendingGameDto.getRoomCode(), pendingGameDto.getPlayerName());
@@ -67,7 +58,7 @@ public class GameResource {
   }
 
   @POST
-  @Path("pending")
+  @Path("pending-game")
   @Produces(MediaType.APPLICATION_JSON)
   public Response joinPendingGame(@Valid PendingGameRequestDto pendingGameDto) {
     String pendingGameId = gameService.joinPendingGame(pendingGameDto.getRoomCode(), pendingGameDto.getPlayerName());

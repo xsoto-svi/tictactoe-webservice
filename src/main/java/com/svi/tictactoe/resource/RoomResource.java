@@ -10,7 +10,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
-@Path("room")
+@Path("rooms")
 public class RoomResource {
 
   private final RoomService roomService;
@@ -21,7 +21,7 @@ public class RoomResource {
   }
 
   @GET
-  @Path("all")
+  @Path("")
   @Produces(MediaType.APPLICATION_JSON)
   public Response getAllRoomCodes() {
     List<JsonObject> roomCodeJsonObjects = roomService.getAllRoomCodes();

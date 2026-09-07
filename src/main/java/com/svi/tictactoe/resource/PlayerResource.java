@@ -10,7 +10,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
-@Path("player")
+@Path("players")
 public class PlayerResource {
 
   private final PlayerService playerService;
@@ -21,7 +21,7 @@ public class PlayerResource {
   }
 
   @GET
-  @Path("all")
+  @Path("")
   @Produces(MediaType.APPLICATION_JSON)
   public Response getAllPlayers() {
     List<JsonObject> playerNameJsonObjects = playerService.getAllPlayerNames();
