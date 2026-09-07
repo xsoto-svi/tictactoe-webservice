@@ -70,12 +70,33 @@ public class GameResource {
   @Path("pending")
   @Produces(MediaType.APPLICATION_JSON)
   public Response joinPendingGame(@Valid PendingGameRequestDto pendingGameDto) {
-    String pendingGameId = gameService.joinPendingGame(pendingGameDto.getRoomCode(), pendingGameDto.getPlayerName());
-    String message = (pendingGameId == null || pendingGameId.isEmpty()) ? "No game found": "Game found.";
+    JoinGameResultDto result = gameService.joinPendingGame(pendingGameDto.getRoomCode(), pendingGameDto.getPlayerName());
+    
+    if (result == null || result.getGameId() == null || result.getGameId().isEmpty()) {
+      return Response.ok()
+              .entity(new ApiResponse("No game found"))
+              .build();
+    }
 
     return Response.ok()
-            .entity(new GameIdResponse(message, pendingGameId))
+            .entity(new JoinPendingResponse("Game found.", result.getGameId(), result.getPlayerName()))
             .build();
+  }
+
+  @GET
+  @Path("status/{gameId}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response getMatchStatus(@PathParam("gameId") String gameId) {
+    String opponentName = gameService.getMatchStatus(gameId);
+    if (opponentName != null) {
+      return Response.ok()
+              .entity(new MatchStatusResponse("MATCH_FOUND", opponentName))
+              .build();
+    } else {
+      return Response.ok()
+              .entity(new MatchStatusResponse("WAITING", null))
+              .build();
+    }
   }
 
   @DELETE

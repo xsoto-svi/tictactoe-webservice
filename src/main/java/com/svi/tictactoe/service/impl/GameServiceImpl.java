@@ -8,6 +8,8 @@ import com.svi.tictactoe.model.entity.GameMove;
 import com.svi.tictactoe.repository.GameRepository;
 import com.svi.tictactoe.repository.PlayerRepository;
 import com.svi.tictactoe.repository.RoomRepository;
+import com.svi.tictactoe.model.dto.response.JoinGameResultDto;
+import com.svi.tictactoe.repository.MatchRepository;
 import com.svi.tictactoe.service.GameService;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -22,14 +24,16 @@ public class GameServiceImpl implements GameService {
   private GameRepository gameRepository;
   private PlayerRepository playerRepository;
   private RoomRepository roomRepository;
+  private MatchRepository matchRepository;
 
   public GameServiceImpl() {}
 
   @Inject
-  public GameServiceImpl(GameRepository gameRepository, PlayerRepository playerRepository, RoomRepository roomRepository) {
+  public GameServiceImpl(GameRepository gameRepository, PlayerRepository playerRepository, RoomRepository roomRepository, MatchRepository matchRepository) {
     this.gameRepository = gameRepository;
     this.playerRepository = playerRepository;
     this.roomRepository = roomRepository;
+    this.matchRepository = matchRepository;
   }
 
   @Override
@@ -65,7 +69,7 @@ public class GameServiceImpl implements GameService {
   }
 
   @Override
-  public String joinPendingGame(String rawRoomCode, String joiningPlayerName) {
+  public JoinGameResultDto joinPendingGame(String rawRoomCode, String joiningPlayerName) {
     String baseRoomCode = extractBaseRoomCode(rawRoomCode);
 
     String gameId = gameRepository.getPendingGameId(baseRoomCode);
@@ -87,10 +91,25 @@ public class GameServiceImpl implements GameService {
     // link room code to this game ID
     roomRepository.addGameIdToRoomCode(baseRoomCode, UUID.fromString(gameId));
 
+    matchRepository.createMatch(gameId, creatorName, joiningPlayerName);
+
     // delete pending game file since the match has officially started
     gameRepository.deletePendingGame(baseRoomCode, gameId);
 
-    return gameId;
+    return new JoinGameResultDto(gameId, creatorName);
+  }
+
+  @Override
+  public String getMatchStatus(String gameId) {
+    String matchContent = matchRepository.getMatch(gameId);
+    if (matchContent == null || matchContent.trim().isEmpty()) {
+      return null;
+    }
+    String[] players = matchContent.split(",");
+    if (players.length > 1) {
+      return players[1]; // Player 2's name
+    }
+    return null;
   }
 
   @Override

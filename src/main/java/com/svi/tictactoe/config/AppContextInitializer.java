@@ -19,6 +19,7 @@ public class AppContextInitializer implements ServletContextListener {
   private static final String PLAYERS_DIR = Config.get(Config.Key.PLAYER_RECORDS_PATH.value());
   private static final String ROOMS_DIR = Config.get(Config.Key.ROOMS_RECORDS_PATH.value());
   private static final String PENDING_DIR = Config.get(Config.Key.PENDING_RECORDS_PATH.value());
+  private static final String MATCHES_DIR = Config.get(Config.Key.MATCHES_RECORDS_PATH.value());
 
   @Override
   public void contextInitialized(ServletContextEvent sce) {
@@ -46,7 +47,13 @@ public class AppContextInitializer implements ServletContextListener {
       Path pendingPath = Paths.get(PENDING_DIR);
       if (!Files.exists(pendingPath)) {
         Files.createDirectories(pendingPath);
-        LOGGER.info("Successfully created directory: " + ROOMS_DIR);
+        LOGGER.info("Successfully created directory: " + PENDING_DIR);
+      }
+
+      Path matchesPath = Paths.get(MATCHES_DIR);
+      if (!Files.exists(matchesPath)) {
+        Files.createDirectories(matchesPath);
+        LOGGER.info("Successfully created directory: " + MATCHES_DIR);
       }
 
     } catch (IOException e) {
