@@ -58,7 +58,7 @@ public class GameResource {
   }
 
   @POST
-  @Path("pending-game")
+  @Path("pending")
   @Produces(MediaType.APPLICATION_JSON)
   public Response joinPendingGame(@Valid PendingGameRequestDto pendingGameDto) {
     String pendingGameId = gameService.joinPendingGame(pendingGameDto.getRoomCode(), pendingGameDto.getPlayerName());
