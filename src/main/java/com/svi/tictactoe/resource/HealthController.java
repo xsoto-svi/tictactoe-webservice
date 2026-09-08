@@ -8,6 +8,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.svi.tictactoe.constants.SuccessMessage;
+
 @Path("health")
 public class HealthController {
 
@@ -15,7 +17,7 @@ public class HealthController {
   @Produces(MediaType.APPLICATION_JSON)
   public Response checkHealth() {
     return Response.ok()
-            .entity(new ApiResponse("Server is running."))
+            .entity(new ApiResponse(SuccessMessage.SERVER_RUNNING.getMessage()))
             .build();
   }
 }

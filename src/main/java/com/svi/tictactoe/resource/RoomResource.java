@@ -10,6 +10,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
+import com.svi.tictactoe.constants.ErrorMessage;
+import com.svi.tictactoe.constants.SuccessMessage;
+
 @Path("rooms")
 public class RoomResource {
 
@@ -25,7 +28,7 @@ public class RoomResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Response getAllRoomCodes() {
     List<JsonObject> roomCodeJsonObjects = roomService.getAllRoomCodes();
-    String message = roomCodeJsonObjects.isEmpty() ? "No records found" : "Records found";
+    String message = roomCodeJsonObjects.isEmpty() ? ErrorMessage.NO_RECORDS_FOUND.getMessage() : SuccessMessage.RECORDS_FOUND.getMessage();
 
     return Response.ok()
             .entity(new ListJsonObjectResponse(message, roomCodeJsonObjects))
@@ -37,7 +40,7 @@ public class RoomResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Response getGamesByRoomCode(@PathParam("roomCode") String roomCode) {
     List<JsonObject> gameUuidJsonObjects = roomService.getGamesByRoomCode(roomCode);
-    String message = gameUuidJsonObjects.isEmpty() ? "No records found" : "Records found";
+    String message = gameUuidJsonObjects.isEmpty() ? ErrorMessage.NO_RECORDS_FOUND.getMessage() : SuccessMessage.RECORDS_FOUND.getMessage();
 
     return Response.ok()
             .entity(new ListJsonObjectResponse(message, gameUuidJsonObjects))

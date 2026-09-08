@@ -2,6 +2,7 @@ package com.svi.tictactoe.service.impl;
 
 import com.svi.tictactoe.exceptions.InvalidMoveException;
 import com.svi.tictactoe.exceptions.PlayerNameAlreadyTakenException;
+import com.svi.tictactoe.constants.ErrorMessage;
 import com.svi.tictactoe.model.dto.request.MoveRequestDto;
 import com.svi.tictactoe.model.dto.response.GameMoveDto;
 import com.svi.tictactoe.model.entity.GameMove;
@@ -40,7 +41,7 @@ public class GameServiceImpl implements GameService {
 
     GameMove move = toEntity(moveRequestDto, gameUuid);
     if (!isMoveValid(move)) {
-      throw new InvalidMoveException("Location " + move.getLocation() + " is already occupied");
+      throw new InvalidMoveException(ErrorMessage.LOCATION_OCCUPIED.formatMessage(move.getLocation()));
     }
 
     GameMove savedMove = gameRepository.saveMoveOnTxtFile(move);
@@ -77,7 +78,7 @@ public class GameServiceImpl implements GameService {
 
     /* Windows file system is case-insensitive */
     if (joiningPlayerName.equalsIgnoreCase(creatorName)) {
-      throw new PlayerNameAlreadyTakenException("Player name '" + joiningPlayerName + "' is already taken in this room.");
+      throw new PlayerNameAlreadyTakenException(joiningPlayerName);
     }
 
     // link both players to this game ID
@@ -128,7 +129,7 @@ public class GameServiceImpl implements GameService {
       move.setLocation(dto.getLocation());
       move.setDateSave(java.time.LocalDateTime.now());
     } catch (IllegalArgumentException e) {
-      throw new RuntimeException("Invalid UUID format for gameId: " + dto.getGameId());
+      throw new RuntimeException(ErrorMessage.INVALID_UUID_FORMAT.formatMessage(dto.getGameId()));
     }
     return move;
   }

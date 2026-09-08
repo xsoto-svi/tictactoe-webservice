@@ -1,5 +1,7 @@
 package com.svi.tictactoe.resource;
 
+import com.svi.tictactoe.constants.ErrorMessage;
+import com.svi.tictactoe.constants.SuccessMessage;
 import com.svi.tictactoe.model.dto.request.MoveRequestDto;
 import com.svi.tictactoe.model.dto.request.PendingGameRequestDto;
 import com.svi.tictactoe.model.dto.response.*;
@@ -30,7 +32,7 @@ public class GameResource {
   public Response saveMove(@Valid MoveRequestDto moveDto) {
     GameMoveDto savedMove = gameService.saveMove(moveDto);
     return Response.ok()
-            .entity(new SaveMoveResponse(savedMove, "Record saved"))
+            .entity(new SaveMoveResponse(savedMove, SuccessMessage.RECORD_SAVED.getMessage()))
             .build();
   }
 
@@ -39,7 +41,7 @@ public class GameResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Response getGameDetailsByGameId(@PathParam("gameId") UUID gameId) {
     List<GameMoveDto> gameDetailsList = gameService.getGameDetailsByGameId(gameId);
-    String message = gameDetailsList.isEmpty() ? "No records found": "Records found.";
+    String message = gameDetailsList.isEmpty() ? ErrorMessage.NO_RECORDS_FOUND.getMessage() : SuccessMessage.RECORDS_FOUND.getMessage();
 
     return Response.ok()
             .entity(new GameDetailsResponse(gameDetailsList, message))
@@ -53,7 +55,7 @@ public class GameResource {
     String gameIdString = gameService.createPendingGame(pendingGameDto.getRoomCode(), pendingGameDto.getPlayerName());
 
     return Response.ok()
-            .entity(new GameIdResponse("Successfully created pending game", gameIdString))
+            .entity(new GameIdResponse(SuccessMessage.GAME_CREATED.getMessage(), gameIdString))
             .build();
   }
 
@@ -62,7 +64,7 @@ public class GameResource {
   @Produces(MediaType.APPLICATION_JSON)
   public Response joinPendingGame(@Valid PendingGameRequestDto pendingGameDto) {
     String pendingGameId = gameService.joinPendingGame(pendingGameDto.getRoomCode(), pendingGameDto.getPlayerName());
-    String message = (pendingGameId == null || pendingGameId.isEmpty()) ? "No game found": "Game found.";
+    String message = (pendingGameId == null || pendingGameId.isEmpty()) ? ErrorMessage.NO_GAME_FOUND.getMessage() : SuccessMessage.GAME_FOUND.getMessage();
 
     return Response.ok()
             .entity(new GameIdResponse(message, pendingGameId))
@@ -76,7 +78,7 @@ public class GameResource {
           @PathParam("gameId") String gameId) {
 
     boolean result = gameService.deletePendingGame(rawRoomCode, gameId);
-    String message = result ? "Successfully deleted pending game" : "Failed to delete pending game";
+    String message = result ? SuccessMessage.GAME_DELETED.getMessage() : ErrorMessage.DELETE_GAME_FAILED.getMessage();
 
     return Response.ok()
             .entity(new ApiResponse(message))
