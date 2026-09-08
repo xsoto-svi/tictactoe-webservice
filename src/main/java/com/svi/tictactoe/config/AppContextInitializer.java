@@ -23,40 +23,20 @@ public class AppContextInitializer implements ServletContextListener {
   @Override
   public void contextInitialized(ServletContextEvent sce) {
     LOGGER.info(">>> Tic-Tac-Toe Application is starting up...");
+    LOGGER.info(">>> Connecting to Cassandra...");
 
     try {
-      Path gamesPath = Paths.get(GAMES_DIR);
-      if (!Files.exists(gamesPath)) {
-        Files.createDirectories(gamesPath);
-        LOGGER.info("Successfully created directory: " + GAMES_DIR);
-      }
-
-      Path playersPath = Paths.get(PLAYERS_DIR);
-      if (!Files.exists(playersPath)) {
-        Files.createDirectories(playersPath);
-        LOGGER.info("Successfully created directory: " + PLAYERS_DIR);
-      }
-
-      Path roomsPath = Paths.get(ROOMS_DIR);
-      if (!Files.exists(roomsPath)) {
-        Files.createDirectories(roomsPath);
-        LOGGER.info("Successfully created directory: " + ROOMS_DIR);
-      }
-
-      Path pendingPath = Paths.get(PENDING_DIR);
-      if (!Files.exists(pendingPath)) {
-        Files.createDirectories(pendingPath);
-        LOGGER.info("Successfully created directory: " + ROOMS_DIR);
-      }
-
-    } catch (IOException e) {
-      LOGGER.severe("Failed to initialize storage directories: " + e.getMessage());
-      throw new RuntimeException("Application startup initialization failed", e);
+      CassandraManager.connectAndInitialize();
+      LOGGER.info(">>> Cassandra initialized successfully.");
+    } catch (Exception e) {
+      LOGGER.severe(">>> Failed to connect to Cassandra: " + e.getMessage());
+      throw new RuntimeException("DB Initialization failed", e);
     }
   }
 
   @Override
   public void contextDestroyed(ServletContextEvent sce) {
-    LOGGER.info(">>> Tic-Tac-Toe Application is shutting down.");
+    LOGGER.info(">>> Shutting down app, closing DB connection.");
+    CassandraManager.close();
   }
 }

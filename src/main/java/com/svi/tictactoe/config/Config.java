@@ -41,7 +41,11 @@ public class Config {
     ROOMS_RECORDS_PATH,
     PENDING_RECORDS_PATH,
 
-    ALLOWED_ORIGINS;
+    ALLOWED_ORIGINS,
+
+    CASSANDRA_HOST,
+    CASSANDRA_PORT,
+    CASSANDRA_DATACENTER;
 
     public String value() {
       return name();
