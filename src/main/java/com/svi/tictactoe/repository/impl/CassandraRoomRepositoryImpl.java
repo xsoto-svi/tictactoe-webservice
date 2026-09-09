@@ -1,10 +1,11 @@
 package com.svi.tictactoe.repository.impl;
 
-import com.datastax.oss.driver.api.core.CqlSession;
-import com.datastax.oss.driver.api.core.cql.PreparedStatement;
-import com.datastax.oss.driver.api.core.cql.ResultSet;
-import com.datastax.oss.driver.api.core.cql.Row;
-import com.svi.tictactoe.config.CassandraManager;
+import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
+import com.datastax.driver.core.Session;
+import com.svi.tictactoe.config.Config;
+import com.svi.tictactoe.connection.CassandraConnection;
 import com.svi.tictactoe.constants.DbConstants;
 import com.svi.tictactoe.repository.RoomRepository;
 
@@ -16,18 +17,34 @@ import java.util.UUID;
 @ApplicationScoped
 public class CassandraRoomRepositoryImpl implements RoomRepository {
 
-  private static final String GET_ROOM_CODES = "SELECT DISTINCT (room_code) FROM " + DbConstants.ROOM_TABLE;
-  private static final String GET_GAMES_BY_ROOM_CODE = "SELECT * FROM " + DbConstants.ROOM_TABLE + " WHERE room_code = ?";
-  private static final String INSERT_GAME_TO_ROOM = "INSERT INTO " + DbConstants.ROOM_TABLE + "(room_code, game_id) VALUES (?, ?)";
+  private final Session session;
+
+  private final PreparedStatement getRoomCodesStatement;
+  private final PreparedStatement getGamesByRoomCodeStatement;
+  private final PreparedStatement insertGameToRoomStatement;
+
+  public CassandraRoomRepositoryImpl() {
+    String roomTable = Config.Key.ROOM_TABLE.value();
+
+    this.session = CassandraConnection.getInstance().getSession();
+
+    // Prepared once during application startup
+    this.getRoomCodesStatement = session.prepare(
+            "SELECT DISTINCT room_code FROM " + roomTable
+    );
+    this.getGamesByRoomCodeStatement = session.prepare(
+            "SELECT * FROM " + roomTable + " WHERE room_code = ?"
+    );
+    this.insertGameToRoomStatement = session.prepare(
+            "INSERT INTO " + roomTable + " (room_code, game_id) VALUES (?, ?)"
+    );
+  }
 
   @Override
   public List<String> getRoomCodes() {
-    CqlSession session = CassandraManager.getSession();
-    PreparedStatement prepared = session.prepare(GET_ROOM_CODES);
-    ResultSet resultSet = session.execute(prepared.bind());
+    ResultSet resultSet = session.execute(getRoomCodesStatement.bind());
 
     List<String> results = new ArrayList<>();
-
     for (Row row : resultSet) {
       results.add(row.getString("room_code"));
     }
@@ -37,14 +54,11 @@ public class CassandraRoomRepositoryImpl implements RoomRepository {
 
   @Override
   public List<UUID> getGamesByRoomCode(String roomCode) {
-    CqlSession session = CassandraManager.getSession();
-    PreparedStatement prepared = session.prepare(GET_GAMES_BY_ROOM_CODE);
-    ResultSet resultSet = session.execute(prepared.bind(roomCode));
+    ResultSet resultSet = session.execute(getGamesByRoomCodeStatement.bind(roomCode));
 
     List<UUID> results = new ArrayList<>();
-
     for (Row row : resultSet) {
-      UUID gameId = row.getUuid("game_id");
+      UUID gameId = row.getUUID("game_id");
       if (gameId != null) {
         results.add(gameId);
       }
@@ -54,13 +68,7 @@ public class CassandraRoomRepositoryImpl implements RoomRepository {
   }
 
   @Override
-  public UUID addGameIdToRoomCode(String roomCode, UUID gameId) {
-    CqlSession session = CassandraManager.getSession();
-    PreparedStatement prepared = session.prepare(INSERT_GAME_TO_ROOM);
-
-    session.execute(prepared.bind(roomCode, gameId));
-
-    return gameId;
+  public void addGameIdToRoomCode(String roomCode, UUID gameId) {
+    session.execute(insertGameToRoomStatement.bind(roomCode, gameId));
   }
 }
-

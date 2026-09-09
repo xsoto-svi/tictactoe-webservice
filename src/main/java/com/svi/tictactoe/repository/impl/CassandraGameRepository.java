@@ -1,72 +1,101 @@
 package com.svi.tictactoe.repository.impl;
 
-import com.datastax.oss.driver.api.core.CqlSession;
-import com.datastax.oss.driver.api.core.cql.PreparedStatement;
-import com.datastax.oss.driver.api.core.cql.ResultSet;
-import com.datastax.oss.driver.api.core.cql.Row;
-import com.svi.tictactoe.config.CassandraManager;
+import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
+import com.datastax.driver.core.Session;
+import com.svi.tictactoe.config.Config;
+import com.svi.tictactoe.connection.CassandraConnection;
 import com.svi.tictactoe.constants.DbConstants;
 import com.svi.tictactoe.model.entity.GameMove;
+import com.svi.tictactoe.repository.GameRepository;
 
-import java.time.LocalDateTime;
+import javax.enterprise.context.ApplicationScoped;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-public class CassandraGameRepository {
+@ApplicationScoped
+public class CassandraGameRepository implements GameRepository {
 
-  // --- PENDING GAME QUERIES ---
-  private static final String INSERT_PENDING = "INSERT INTO " + DbConstants.PENDING_GAME_TABLE + " (room_code, game_id, player_name) VALUES (?, ?, ?)";
-  private static final String SELECT_PENDING_ID = "SELECT game_id FROM " + DbConstants.PENDING_GAME_TABLE + " WHERE room_code = ?";
-  private static final String SELECT_PENDING_CREATOR = "SELECT player_name FROM " + DbConstants.PENDING_GAME_TABLE + " WHERE room_code = ? AND game_id = ?";
+  private final Session session;
 
-  // IF EXISTS allows us to know if the row was actually there to be deleted
-  private static final String DELETE_PENDING = "DELETE FROM " + DbConstants.PENDING_GAME_TABLE + " WHERE room_code = ? AND game_id = ? IF EXISTS";
+  private final PreparedStatement insertPendingStatement;
+  private final PreparedStatement selectPendingIdStatement;
+  private final PreparedStatement selectPendingCreatorStatement;
+  private final PreparedStatement deletePendingStatement;
+  private final PreparedStatement insertMoveStatement;
+  private final PreparedStatement selectMovesStatement;
 
-  // --- GAME MOVE QUERIES ---
-  private static final String INSERT_MOVE = "INSERT INTO " + DbConstants.GAME_TABLE + " (game_id, date_save, player_name, symbol, location) VALUES (?, ?, ?, ?, ?)";
-  private static final String SELECT_MOVES = "SELECT * FROM " + DbConstants.GAME_TABLE + " WHERE game_id = ?";
+  public CassandraGameRepository() {
+    String pendingGameTable = Config.Key.PENDING_GAME_TABLE.value();
+    String gameTable = Config.Key.GAME_TABLE.value();
 
+    this.session = CassandraConnection.getInstance().getSession();
+
+    this.insertPendingStatement = session.prepare(
+            "INSERT INTO " + pendingGameTable + " (room_code, game_id, player_name) VALUES (?, ?, ?)"
+    );
+    this.selectPendingIdStatement = session.prepare(
+            "SELECT game_id FROM " + pendingGameTable + " WHERE room_code = ?"
+    );
+    this.selectPendingCreatorStatement = session.prepare(
+            "SELECT player_name FROM " + pendingGameTable + " WHERE room_code = ? AND game_id = ?"
+    );
+    this.deletePendingStatement = session.prepare(
+            "DELETE FROM " + pendingGameTable + " WHERE room_code = ? AND game_id = ? IF EXISTS"
+    );
+
+    this.insertMoveStatement = session.prepare(
+            "INSERT INTO " + gameTable + " (game_id, date_save, player_name, symbol, location) VALUES (?, ?, ?, ?, ?)"
+    );
+    this.selectMovesStatement = session.prepare(
+            "SELECT * FROM " + gameTable + " WHERE game_id = ?"
+    );
+  }
+
+  @Override
   public void createPendingGame(String gameId, String roomCode, String playerName) {
-    CqlSession session = CassandraManager.getSession();
-    PreparedStatement prepared = session.prepare(INSERT_PENDING);
-    session.execute(prepared.bind(roomCode, gameId, playerName));
+    session.execute(insertPendingStatement.bind(roomCode, UUID.fromString(gameId), playerName));
   }
 
+  @Override
   public String getPendingGameId(String roomCode) {
-    CqlSession session = CassandraManager.getSession();
-    PreparedStatement prepared = session.prepare(SELECT_PENDING_ID);
-    ResultSet resultSet = session.execute(prepared.bind(roomCode));
-
+    ResultSet resultSet = session.execute(selectPendingIdStatement.bind(roomCode));
     Row row = resultSet.one();
-    return (row != null) ? row.getString("game_id") : null;
+
+    if (row != null) {
+      UUID gameId = row.getUUID("game_id");
+      return gameId != null ? gameId.toString() : null;
+    }
+    return null;
   }
 
-  String getPendingGameCreatorName(String roomCode, String gameId) {
-    CqlSession session = CassandraManager.getSession();
-    PreparedStatement prepared = session.prepare(SELECT_PENDING_CREATOR);
-    ResultSet resultSet = session.execute(prepared.bind(roomCode, gameId));
-
+  @Override
+  public String getPendingGameCreatorName(String roomCode, String gameId) {
+    ResultSet resultSet = session.execute(selectPendingCreatorStatement.bind(roomCode, UUID.fromString(gameId)));
     Row row = resultSet.one();
+
     return (row != null) ? row.getString("player_name") : null;
   }
 
-  boolean deletePendingGame(String roomCode, String gameId) {
-    CqlSession session = CassandraManager.getSession();
-    PreparedStatement prepared = session.prepare(DELETE_PENDING);
-    ResultSet resultSet = session.execute(prepared.bind(roomCode, gameId));
-
-    // Returns true if the row existed and was deleted, matching Files.deleteIfExists()
+  @Override
+  public boolean deletePendingGame(String roomCode, String gameId) {
+    ResultSet resultSet = session.execute(deletePendingStatement.bind(roomCode, UUID.fromString(gameId)));
+    // Returns true if the row existed and was deleted
     return resultSet.wasApplied();
   }
 
-  GameMove saveMoveOnTxtFile(GameMove move) {
-    CqlSession session = CassandraManager.getSession();
-    PreparedStatement prepared = session.prepare(INSERT_MOVE);
+  @Override
+  public GameMove saveMoveOnTxtFile(GameMove move) {
+    // Convert Java LocalDateTime to java.util.Date for Cassandra timestamp column
+    Date cassandraTimestamp = Timestamp.valueOf(move.getDateSave());
 
-    session.execute(prepared.bind(
+    session.execute(insertMoveStatement.bind(
             move.getGameId(),
-            move.getDateSave().toString(), // Convert LocalDateTime to ISO-8601 String
+            cassandraTimestamp,
             move.getPlayerName(),
             move.getSymbol(),
             move.getLocation()
@@ -75,22 +104,22 @@ public class CassandraGameRepository {
     return move;
   }
 
-  List<GameMove> getGameDetailsByGameId(UUID id){
-    CqlSession session = CassandraManager.getSession();
-    PreparedStatement prepared = session.prepare(SELECT_MOVES);
-    ResultSet resultSet = session.execute(prepared.bind(id));
+  @Override
+  public List<GameMove> getGameDetailsByGameId(UUID id) {
+    ResultSet resultSet = session.execute(selectMovesStatement.bind(id));
 
     List<GameMove> moves = new ArrayList<>();
     for (Row row : resultSet) {
       GameMove move = new GameMove();
-      move.setGameId(row.getUuid("game_id"));
+      move.setGameId(row.getUUID("game_id"));
       move.setPlayerName(row.getString("player_name"));
       move.setSymbol(row.getString("symbol"));
       move.setLocation(row.getInt("location"));
 
-      String dateSaveStr = row.getString("date_save");
-      if (dateSaveStr != null) {
-        move.setDateSave(LocalDateTime.parse(dateSaveStr));
+      // Convert Cassandra java.util.Date back to Java LocalDateTime
+      Date dateSave = row.getTimestamp("date_save");
+      if (dateSave != null) {
+        move.setDateSave(new Timestamp(dateSave.getTime()).toLocalDateTime());
       }
 
       moves.add(move);

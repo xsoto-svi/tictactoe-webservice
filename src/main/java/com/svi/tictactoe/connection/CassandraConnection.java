@@ -1,31 +1,47 @@
-package com.svi.tictactoe.config;
+package com.svi.tictactoe.connection;
 
-import com.datastax.oss.driver.api.core.CqlSession;
-import java.net.InetSocketAddress;
+import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.Session;
+import com.svi.tictactoe.config.Config;
 
-public class CassandraManager {
+import javax.enterprise.context.ApplicationScoped;
 
-  private static CqlSession session;
+public class CassandraConnection implements AutoCloseable {
 
-  public static void connectAndInitialize() {
+  private final Cluster cluster;
+  private final Session session;
+
+  public CassandraConnection() {
     String host = Config.get(Config.Key.CASSANDRA_IP.value());
     int port = Integer.parseInt(Config.get(Config.Key.CASSANDRA_PORT.value()));
-    String datacenter = Config.get(Config.Key.CASSANDRA_DATACENTER.value());
 
-    session = CqlSession.builder()
-            .addContactPoint(new InetSocketAddress(host, port))
-            .withLocalDatacenter(datacenter)
+    this.cluster = Cluster.builder()
+            .addContactPoint(host)
+            .withPort(port)
             .build();
+
+    this.session = cluster.connect();
+  }
+
+  private static final class ConnectionHolder {
+    private static final CassandraConnection INSTANCE = new CassandraConnection();
+  }
+
+  public static CassandraConnection getInstance() {
+    return ConnectionHolder.INSTANCE;
+  }
+
+  public void initializeTables() {
 
     session.execute("CREATE TABLE IF NOT EXISTS batch1_2026_trainees.soto_room_table (" +
             "room_code text, " +
             "game_id uuid, " +
-            "PRIMARY KEY (room_code));");
+            "PRIMARY KEY (room_code, game_id));");
 
     session.execute("CREATE TABLE IF NOT EXISTS batch1_2026_trainees.soto_player_table (" +
             "player_name text, " +
             "game_id uuid, " +
-            "PRIMARY KEY (player_name));");
+            "PRIMARY KEY (player_name, game_id));");
 
     session.execute("CREATE TABLE IF NOT EXISTS batch1_2026_trainees.soto_game_table (" +
             "game_id uuid, " +
@@ -33,22 +49,31 @@ public class CassandraManager {
             "symbol text, " +
             "location int, " +
             "date_save timestamp, " +
-            "PRIMARY KEY (game_id));");
+            "PRIMARY KEY (game_id, date_save)) " +
+            "WITH CLUSTERING ORDER BY (date_save ASC);");
 
     session.execute("CREATE TABLE IF NOT EXISTS batch1_2026_trainees.soto_pending_game_table (" +
             "room_code text, " +
             "game_id uuid, " +
             "player_name text, " +
-            "PRIMARY KEY (room_code));");
+            "PRIMARY KEY (room_code, game_id));");
   }
 
-  public static CqlSession getSession() {
+  public Session getSession() {
     return session;
   }
 
-  public static void close() {
-    if (session != null) {
+  public Cluster getCluster() {
+    return cluster;
+  }
+
+  @Override
+  public void close() {
+    if (session != null && !session.isClosed()) {
       session.close();
+    }
+    if (cluster != null && !cluster.isClosed()) {
+      cluster.close();
     }
   }
 }

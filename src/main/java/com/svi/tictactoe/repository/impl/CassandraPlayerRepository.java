@@ -1,10 +1,11 @@
 package com.svi.tictactoe.repository.impl;
 
-import com.datastax.oss.driver.api.core.CqlSession;
-import com.datastax.oss.driver.api.core.cql.PreparedStatement;
-import com.datastax.oss.driver.api.core.cql.ResultSet;
-import com.datastax.oss.driver.api.core.cql.Row;
-import com.svi.tictactoe.config.CassandraManager;
+import com.datastax.driver.core.PreparedStatement;
+import com.datastax.driver.core.ResultSet;
+import com.datastax.driver.core.Row;
+import com.datastax.driver.core.Session;
+import com.svi.tictactoe.config.Config;
+import com.svi.tictactoe.connection.CassandraConnection;
 import com.svi.tictactoe.constants.DbConstants;
 import com.svi.tictactoe.repository.PlayerRepository;
 
@@ -16,18 +17,33 @@ import java.util.UUID;
 @ApplicationScoped
 public class CassandraPlayerRepository implements PlayerRepository {
 
-  private static final String GET_PLAYER_NAMES = "SELECT DISTINCT (player_name) FROM " + DbConstants.PLAYER_TABLE;
-  private static final String GET_PLAYER_NAMES_BY_ROOM_CODE = "SELECT * FROM " + DbConstants.PLAYER_TABLE + " WHERE player_name = ?";
-  private static final String INSERT_GAME_TO_ROOM = "INSERT INTO " + DbConstants.PLAYER_TABLE + " (player_name, game_id) VALUES (?, ?)";
+  private final Session session;
+
+  private final PreparedStatement getPlayerNamesStatement;
+  private final PreparedStatement getGamesByPlayerNameStatement;
+  private final PreparedStatement insertGameToPlayerStatement;
+
+  public CassandraPlayerRepository() {
+    String playerTable = Config.Key.PLAYER_TABLE.value();
+
+    this.session = CassandraConnection.getInstance().getSession();
+
+    this.getPlayerNamesStatement = session.prepare(
+            "SELECT DISTINCT player_name FROM " + playerTable
+    );
+    this.getGamesByPlayerNameStatement = session.prepare(
+            "SELECT * FROM " + playerTable + " WHERE player_name = ?"
+    );
+    this.insertGameToPlayerStatement = session.prepare(
+            "INSERT INTO " + playerTable + " (player_name, game_id) VALUES (?, ?)"
+    );
+  }
 
   @Override
   public List<String> getPlayerNames() {
-    CqlSession session = CassandraManager.getSession();
-    PreparedStatement prepared = session.prepare(GET_PLAYER_NAMES);
-    ResultSet resultSet = session.execute(prepared.bind());
+    ResultSet resultSet = session.execute(getPlayerNamesStatement.bind());
 
     List<String> results = new ArrayList<>();
-
     for (Row row : resultSet) {
       results.add(row.getString("player_name"));
     }
@@ -37,14 +53,12 @@ public class CassandraPlayerRepository implements PlayerRepository {
 
   @Override
   public List<UUID> getGamesByPlayerName(String name) {
-    CqlSession session = CassandraManager.getSession();
-    PreparedStatement prepared = session.prepare(GET_PLAYER_NAMES_BY_ROOM_CODE);
-    ResultSet resultSet = session.execute(prepared.bind(name));
+    ResultSet resultSet = session.execute(getGamesByPlayerNameStatement.bind(name));
 
     List<UUID> results = new ArrayList<>();
-
     for (Row row : resultSet) {
-      UUID gameId = row.getUuid("game_id");
+      // In DataStax v3, the method is getUUID(), not getUuid()
+      UUID gameId = row.getUUID("game_id");
       if (gameId != null) {
         results.add(gameId);
       }
@@ -55,10 +69,6 @@ public class CassandraPlayerRepository implements PlayerRepository {
 
   @Override
   public void addGameIdToPlayer(UUID gameId, String playerName) {
-    CqlSession session = CassandraManager.getSession();
-    PreparedStatement prepared = session.prepare(INSERT_GAME_TO_ROOM);
-
-    session.execute(prepared.bind(playerName, gameId));
+    session.execute(insertGameToPlayerStatement.bind(playerName, gameId));
   }
 }
-

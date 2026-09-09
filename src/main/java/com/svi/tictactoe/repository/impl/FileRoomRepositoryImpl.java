@@ -47,7 +47,7 @@ public class FileRoomRepositoryImpl implements RoomRepository {
     }
 
     @Override
-    public synchronized UUID addGameIdToRoomCode(String roomCode, UUID gameId) {
+    public synchronized void addGameIdToRoomCode(String roomCode, UUID gameId) {
         Path roomPath = Paths.get(ROOMS_DIR, roomCode + ".txt");
         String line = gameId + System.lineSeparator();
 
@@ -61,8 +61,6 @@ public class FileRoomRepositoryImpl implements RoomRepository {
         } catch (IOException exception) {
             throw new RuntimeException("Failed to update room games list", exception);
         }
-
-        return gameId;
     }
 }
 
