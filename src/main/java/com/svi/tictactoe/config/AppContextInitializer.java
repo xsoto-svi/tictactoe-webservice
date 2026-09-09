@@ -1,5 +1,7 @@
 package com.svi.tictactoe.config;
 
+import com.svi.tictactoe.connection.CassandraConnection;
+
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
@@ -10,18 +12,13 @@ public class AppContextInitializer implements ServletContextListener {
 
   private static final Logger LOGGER = Logger.getLogger(AppContextInitializer.class.getName());
 
-  private static final String GAMES_DIR = Config.get(Config.Key.GAME_RECORDS_PATH.value());
-  private static final String PLAYERS_DIR = Config.get(Config.Key.PLAYER_RECORDS_PATH.value());
-  private static final String ROOMS_DIR = Config.get(Config.Key.ROOMS_RECORDS_PATH.value());
-  private static final String PENDING_DIR = Config.get(Config.Key.PENDING_RECORDS_PATH.value());
-
   @Override
   public void contextInitialized(ServletContextEvent sce) {
     LOGGER.info(">>> Tic-Tac-Toe Application is starting up...");
     LOGGER.info(">>> Connecting to Cassandra...");
 
     try {
-      CassandraManager.connectAndInitialize();
+//      cassandraConnection.initializeTables();
       LOGGER.info(">>> Cassandra initialized successfully.");
     } catch (Exception e) {
       LOGGER.severe(">>> Failed to connect to Cassandra: " + e.getMessage());
@@ -32,6 +29,6 @@ public class AppContextInitializer implements ServletContextListener {
   @Override
   public void contextDestroyed(ServletContextEvent sce) {
     LOGGER.info(">>> Shutting down app, closing DB connection.");
-    CassandraManager.close();
+    CassandraConnection.getInstance().close();
   }
 }

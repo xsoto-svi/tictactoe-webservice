@@ -8,7 +8,7 @@ public class CassandraManager {
   private static CqlSession session;
 
   public static void connectAndInitialize() {
-    String host = Config.get(Config.Key.CASSANDRA_HOST.value());
+    String host = Config.get(Config.Key.CASSANDRA_IP.value());
     int port = Integer.parseInt(Config.get(Config.Key.CASSANDRA_PORT.value()));
     String datacenter = Config.get(Config.Key.CASSANDRA_DATACENTER.value());
 
