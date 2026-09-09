@@ -34,6 +34,12 @@ public class CassandraManager {
             "location int, " +
             "date_save timestamp, " +
             "PRIMARY KEY (game_id));");
+
+    session.execute("CREATE TABLE IF NOT EXISTS batch1_2026_trainees.soto_pending_game_table (" +
+            "room_code text, " +
+            "game_id uuid, " +
+            "player_name text, " +
+            "PRIMARY KEY (room_code));");
   }
 
   public static CqlSession getSession() {
