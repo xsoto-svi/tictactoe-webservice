@@ -36,16 +36,17 @@ public class Config {
   }
 
   public enum Key {
-    GAME_RECORDS_PATH,
-    PLAYER_RECORDS_PATH,
-    ROOMS_RECORDS_PATH,
-    PENDING_RECORDS_PATH,
-
     ALLOWED_ORIGINS,
 
-    CASSANDRA_HOST,
+    CASSANDRA_IP,
     CASSANDRA_PORT,
-    CASSANDRA_DATACENTER;
+    CASSANDRA_DATACENTER,
+    CASSANDRA_KEYSPACE,
+
+    ROOM_TABLE,
+    GAME_TABLE,
+    PENDING_GAME_TABLE,
+    PLAYER_TABLE;
 
     public String value() {
       return name();
