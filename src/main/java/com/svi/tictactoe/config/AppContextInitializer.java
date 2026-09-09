@@ -18,7 +18,6 @@ public class AppContextInitializer implements ServletContextListener {
     LOGGER.info(">>> Connecting to Cassandra...");
 
     try {
-//      cassandraConnection.initializeTables();
       LOGGER.info(">>> Cassandra initialized successfully.");
     } catch (Exception e) {
       LOGGER.severe(">>> Failed to connect to Cassandra: " + e.getMessage());

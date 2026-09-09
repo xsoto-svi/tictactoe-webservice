@@ -6,7 +6,6 @@ import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.svi.tictactoe.config.Config;
 import com.svi.tictactoe.connection.CassandraConnection;
-import com.svi.tictactoe.constants.DbConstants;
 import com.svi.tictactoe.model.entity.GameMove;
 import com.svi.tictactoe.repository.GameRepository;
 
@@ -30,8 +29,8 @@ public class CassandraGameRepository implements GameRepository {
   private final PreparedStatement selectMovesStatement;
 
   public CassandraGameRepository() {
-    String pendingGameTable = Config.Key.PENDING_GAME_TABLE.value();
-    String gameTable = Config.Key.GAME_TABLE.value();
+    String pendingGameTable = Config.get(Config.Key.PENDING_GAME_TABLE.value());
+    String gameTable = Config.get(Config.Key.GAME_TABLE.value());
 
     this.session = CassandraConnection.getInstance().getSession();
 
@@ -84,7 +83,6 @@ public class CassandraGameRepository implements GameRepository {
   @Override
   public boolean deletePendingGame(String roomCode, String gameId) {
     ResultSet resultSet = session.execute(deletePendingStatement.bind(roomCode, UUID.fromString(gameId)));
-    // Returns true if the row existed and was deleted
     return resultSet.wasApplied();
   }
 

@@ -6,7 +6,6 @@ import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.svi.tictactoe.config.Config;
 import com.svi.tictactoe.connection.CassandraConnection;
-import com.svi.tictactoe.constants.DbConstants;
 import com.svi.tictactoe.repository.RoomRepository;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -24,11 +23,10 @@ public class CassandraRoomRepositoryImpl implements RoomRepository {
   private final PreparedStatement insertGameToRoomStatement;
 
   public CassandraRoomRepositoryImpl() {
-    String roomTable = Config.Key.ROOM_TABLE.value();
+    String roomTable = Config.get(Config.Key.ROOM_TABLE.value());
 
     this.session = CassandraConnection.getInstance().getSession();
 
-    // Prepared once during application startup
     this.getRoomCodesStatement = session.prepare(
             "SELECT DISTINCT room_code FROM " + roomTable
     );

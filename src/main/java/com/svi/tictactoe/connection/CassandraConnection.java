@@ -3,13 +3,17 @@ package com.svi.tictactoe.connection;
 import com.datastax.driver.core.Cluster;
 import com.datastax.driver.core.Session;
 import com.svi.tictactoe.config.Config;
+import com.svi.tictactoe.exceptions.mapper.CassandraExceptionMapper;
 
 import javax.enterprise.context.ApplicationScoped;
+import java.util.logging.Logger;
 
 public class CassandraConnection implements AutoCloseable {
 
   private final Cluster cluster;
   private final Session session;
+
+  private static final Logger LOGGER = Logger.getLogger(CassandraExceptionMapper.class.getName());
 
   public CassandraConnection() {
     String host = Config.get(Config.Key.CASSANDRA_IP.value());
@@ -20,7 +24,7 @@ public class CassandraConnection implements AutoCloseable {
             .withPort(port)
             .build();
 
-    this.session = cluster.connect();
+    this.session = cluster.connect(Config.get(Config.Key.CASSANDRA_KEYSPACE.value()));
   }
 
   private static final class ConnectionHolder {
@@ -29,34 +33,6 @@ public class CassandraConnection implements AutoCloseable {
 
   public static CassandraConnection getInstance() {
     return ConnectionHolder.INSTANCE;
-  }
-
-  public void initializeTables() {
-
-    session.execute("CREATE TABLE IF NOT EXISTS batch1_2026_trainees.soto_room_table (" +
-            "room_code text, " +
-            "game_id uuid, " +
-            "PRIMARY KEY (room_code, game_id));");
-
-    session.execute("CREATE TABLE IF NOT EXISTS batch1_2026_trainees.soto_player_table (" +
-            "player_name text, " +
-            "game_id uuid, " +
-            "PRIMARY KEY (player_name, game_id));");
-
-    session.execute("CREATE TABLE IF NOT EXISTS batch1_2026_trainees.soto_game_table (" +
-            "game_id uuid, " +
-            "player_name text, " +
-            "symbol text, " +
-            "location int, " +
-            "date_save timestamp, " +
-            "PRIMARY KEY (game_id, date_save)) " +
-            "WITH CLUSTERING ORDER BY (date_save ASC);");
-
-    session.execute("CREATE TABLE IF NOT EXISTS batch1_2026_trainees.soto_pending_game_table (" +
-            "room_code text, " +
-            "game_id uuid, " +
-            "player_name text, " +
-            "PRIMARY KEY (room_code, game_id));");
   }
 
   public Session getSession() {

@@ -6,6 +6,7 @@ import com.svi.tictactoe.repository.RoomRepository;
 import com.svi.tictactoe.utils.FileUtil;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Vetoed;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
@@ -14,10 +15,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@ApplicationScoped
+@Vetoed
+//@ApplicationScoped
 public class FileRoomRepositoryImpl implements RoomRepository {
 
-    private static final String ROOMS_DIR = Config.get(Config.Key.ROOMS_RECORDS_PATH.value());
+    private static final String ROOMS_DIR = Config.get(Config.Key.ROOM_RECORDS_PATH.value());
 
     @Override
     public List<String> getRoomCodes() {

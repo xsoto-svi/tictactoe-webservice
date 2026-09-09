@@ -6,7 +6,6 @@ import com.datastax.driver.core.Row;
 import com.datastax.driver.core.Session;
 import com.svi.tictactoe.config.Config;
 import com.svi.tictactoe.connection.CassandraConnection;
-import com.svi.tictactoe.constants.DbConstants;
 import com.svi.tictactoe.repository.PlayerRepository;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -24,7 +23,7 @@ public class CassandraPlayerRepository implements PlayerRepository {
   private final PreparedStatement insertGameToPlayerStatement;
 
   public CassandraPlayerRepository() {
-    String playerTable = Config.Key.PLAYER_TABLE.value();
+    String playerTable = Config.get(Config.Key.PLAYER_TABLE.value());
 
     this.session = CassandraConnection.getInstance().getSession();
 

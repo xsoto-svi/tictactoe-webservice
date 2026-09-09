@@ -6,6 +6,7 @@ import com.svi.tictactoe.model.entity.GameMove;
 import com.svi.tictactoe.repository.GameRepository;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Vetoed;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
@@ -15,7 +16,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@ApplicationScoped
+@Vetoed
+//@ApplicationScoped
 public class FileGameRepositoryImpl implements GameRepository {
 
     private static final String GAMES_DIR = Config.get(Config.Key.GAME_RECORDS_PATH.value());

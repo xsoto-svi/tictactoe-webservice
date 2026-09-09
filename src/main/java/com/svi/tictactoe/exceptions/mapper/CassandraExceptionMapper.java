@@ -1,6 +1,6 @@
 package com.svi.tictactoe.exceptions.mapper;
 
-import com.datastax.oss.driver.api.core.DriverException;
+import com.datastax.driver.core.exceptions.DriverException;
 import com.svi.tictactoe.constants.ErrorMessage;
 import com.svi.tictactoe.model.dto.response.ApiResponse;
 
