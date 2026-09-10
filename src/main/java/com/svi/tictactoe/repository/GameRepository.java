@@ -10,7 +10,7 @@ public interface GameRepository {
     String getPendingGameId(String roomCode);
     String getPendingGameCreatorName(String roomCode, String gameId);
     boolean deletePendingGame(String roomCode, String gameId);
-    GameMove saveMoveOnTxtFile(GameMove move);
+    GameMove saveMove(GameMove move);
     List<GameMove> getGameDetailsByGameId(UUID id);
 }
 

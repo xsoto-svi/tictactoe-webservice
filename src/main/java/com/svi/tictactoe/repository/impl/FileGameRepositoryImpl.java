@@ -68,7 +68,7 @@ public class FileGameRepositoryImpl implements GameRepository {
     }
 
     @Override
-    public GameMove saveMoveOnTxtFile(GameMove move) {
+    public GameMove saveMove(GameMove move) {
         String gameIdString = move.getGameId().toString();
         Path gamesPath = Paths.get(GAMES_DIR, gameIdString + ".txt");
 

@@ -87,7 +87,7 @@ public class CassandraGameRepository implements GameRepository {
   }
 
   @Override
-  public GameMove saveMoveOnTxtFile(GameMove move) {
+  public GameMove saveMove(GameMove move) {
     // Convert Java LocalDateTime to java.util.Date for Cassandra timestamp column
     Date cassandraTimestamp = Timestamp.valueOf(move.getDateSave());
 

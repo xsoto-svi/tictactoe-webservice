@@ -44,7 +44,7 @@ public class GameServiceImpl implements GameService {
       throw new InvalidMoveException(ErrorMessage.LOCATION_OCCUPIED.formatMessage(move.getLocation()));
     }
 
-    GameMove savedMove = gameRepository.saveMoveOnTxtFile(move);
+    GameMove savedMove = gameRepository.saveMove(move);
 
     return toDto(savedMove);
   }
