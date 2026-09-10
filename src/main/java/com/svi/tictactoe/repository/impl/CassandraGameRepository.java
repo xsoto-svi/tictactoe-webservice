@@ -21,31 +21,13 @@ public class CassandraGameRepository implements GameRepository {
 
   private final Session session;
 
-  private final PreparedStatement insertPendingStatement;
-  private final PreparedStatement selectPendingIdStatement;
-  private final PreparedStatement selectPendingCreatorStatement;
-  private final PreparedStatement deletePendingStatement;
   private final PreparedStatement insertMoveStatement;
   private final PreparedStatement selectMovesStatement;
 
   public CassandraGameRepository() {
-    String pendingGameTable = Config.get(Config.Key.PENDING_GAME_TABLE.value());
     String gameTable = Config.get(Config.Key.GAME_TABLE.value());
 
     this.session = CassandraConnection.getInstance().getSession();
-
-    this.insertPendingStatement = session.prepare(
-            "INSERT INTO " + pendingGameTable + " (room_code, game_id, player_name) VALUES (?, ?, ?)"
-    );
-    this.selectPendingIdStatement = session.prepare(
-            "SELECT game_id FROM " + pendingGameTable + " WHERE room_code = ?"
-    );
-    this.selectPendingCreatorStatement = session.prepare(
-            "SELECT player_name FROM " + pendingGameTable + " WHERE room_code = ? AND game_id = ?"
-    );
-    this.deletePendingStatement = session.prepare(
-            "DELETE FROM " + pendingGameTable + " WHERE room_code = ? AND game_id = ?"
-    );
 
     this.insertMoveStatement = session.prepare(
             "INSERT INTO " + gameTable + " (game_id, date_save, player_name, symbol, location) VALUES (?, ?, ?, ?, ?)"
@@ -53,37 +35,6 @@ public class CassandraGameRepository implements GameRepository {
     this.selectMovesStatement = session.prepare(
             "SELECT * FROM " + gameTable + " WHERE game_id = ?"
     );
-  }
-
-  @Override
-  public void createPendingGame(String gameId, String roomCode, String playerName) {
-    session.execute(insertPendingStatement.bind(roomCode, UUID.fromString(gameId), playerName));
-  }
-
-  @Override
-  public String getPendingGameId(String roomCode) {
-    ResultSet resultSet = session.execute(selectPendingIdStatement.bind(roomCode));
-    Row row = resultSet.one();
-
-    if (row != null) {
-      UUID gameId = row.getUUID("game_id");
-      return gameId != null ? gameId.toString() : null;
-    }
-    return null;
-  }
-
-  @Override
-  public String getPendingGameCreatorName(String roomCode, String gameId) {
-    ResultSet resultSet = session.execute(selectPendingCreatorStatement.bind(roomCode, UUID.fromString(gameId)));
-    Row row = resultSet.one();
-
-    return (row != null) ? row.getString("player_name") : null;
-  }
-
-  @Override
-  public boolean deletePendingGame(String roomCode, String gameId) {
-    ResultSet resultSet = session.execute(deletePendingStatement.bind(roomCode, UUID.fromString(gameId)));
-    return resultSet.wasApplied();
   }
 
   @Override

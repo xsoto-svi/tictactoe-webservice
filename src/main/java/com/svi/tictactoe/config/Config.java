@@ -50,7 +50,6 @@ public class Config {
 
     ROOM_TABLE,
     GAME_TABLE,
-    PENDING_GAME_TABLE,
     PLAYER_TABLE;
 
     public String value() {

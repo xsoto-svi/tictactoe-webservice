@@ -11,6 +11,5 @@ public interface GameService {
     List<GameMoveDto> getGameDetailsByGameId(UUID id);
     String joinPendingGame(String rawRoomCode, String joiningPlayerName);
     String createPendingGame(String rawRoomCode, String playerName);
-    boolean deletePendingGame(String rawRoomCode, String gameId);
+    boolean cancelPendingGame(String rawRoomCode, String gameId);
 }
-

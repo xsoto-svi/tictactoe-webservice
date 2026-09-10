@@ -34,7 +34,7 @@ public class CassandraPlayerRepository implements PlayerRepository {
             "SELECT * FROM " + playerTable + " WHERE player_name = ?"
     );
     this.insertGameToPlayerStatement = session.prepare(
-            "INSERT INTO " + playerTable + " (player_name, game_id) VALUES (?, ?)"
+            "INSERT INTO " + playerTable + " (player_name, game_id, room_code) VALUES (?, ?, ?)"
     );
   }
 
@@ -56,7 +56,6 @@ public class CassandraPlayerRepository implements PlayerRepository {
 
     List<UUID> results = new ArrayList<>();
     for (Row row : resultSet) {
-      // In DataStax v3, the method is getUUID(), not getUuid()
       UUID gameId = row.getUUID("game_id");
       if (gameId != null) {
         results.add(gameId);
@@ -67,7 +66,20 @@ public class CassandraPlayerRepository implements PlayerRepository {
   }
 
   @Override
-  public void addGameIdToPlayer(UUID gameId, String playerName) {
-    session.execute(insertGameToPlayerStatement.bind(playerName, gameId));
+  public void addGameIdToPlayer(UUID gameId, String playerName, String roomCode) {
+    session.execute(insertGameToPlayerStatement.bind(playerName, gameId, roomCode));
+  }
+
+  @Override
+  public String getCreatorByRoomAndGame(String roomCode, UUID gameId) {
+    ResultSet resultSet = session.execute(getPlayerNamesStatement.bind());
+    for (Row row : resultSet) {
+      String playerName = row.getString("player_name");
+      List<UUID> games = getGamesByPlayerName(playerName);
+      if (games.contains(gameId)) {
+        return playerName;
+      }
+    }
+    return null;
   }
 }

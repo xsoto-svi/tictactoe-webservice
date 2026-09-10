@@ -48,7 +48,7 @@ public class FilePlayerRepositoryImpl implements PlayerRepository {
     }
 
     @Override
-    public synchronized void addGameIdToPlayer(UUID gameId, String playerName) {
+    public synchronized void addGameIdToPlayer(UUID gameId, String playerName, String roomCode) {
         Path playerPath = Paths.get(PLAYERS_DIR, playerName + ".txt");
         String line = gameId + System.lineSeparator();
 
@@ -62,6 +62,11 @@ public class FilePlayerRepositoryImpl implements PlayerRepository {
         } catch (IOException exception) {
             throw new RuntimeException("Failed to update player games list", exception);
         }
+    }
+
+    @Override
+    public String getCreatorByRoomAndGame(String roomCode, UUID gameId) {
+        return null;
     }
 }
 

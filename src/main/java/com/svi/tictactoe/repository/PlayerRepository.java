@@ -6,6 +6,7 @@ import java.util.UUID;
 public interface PlayerRepository {
     List<String> getPlayerNames();
     List<UUID> getGamesByPlayerName(String name);
-    void addGameIdToPlayer(UUID gameId, String playerName);
+    void addGameIdToPlayer(UUID gameId, String playerName, String roomCode);
+    String getCreatorByRoomAndGame(String roomCode, UUID gameId);
 }
 

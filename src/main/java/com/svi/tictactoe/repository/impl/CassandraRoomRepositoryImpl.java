@@ -21,6 +21,7 @@ public class CassandraRoomRepositoryImpl implements RoomRepository {
   private final PreparedStatement getRoomCodesStatement;
   private final PreparedStatement getGamesByRoomCodeStatement;
   private final PreparedStatement insertGameToRoomStatement;
+  private final PreparedStatement updateRoomStatusStatement;
 
   public CassandraRoomRepositoryImpl() {
     String roomTable = Config.get(Config.Key.ROOM_TABLE.value());
@@ -34,7 +35,10 @@ public class CassandraRoomRepositoryImpl implements RoomRepository {
             "SELECT * FROM " + roomTable + " WHERE room_code = ?"
     );
     this.insertGameToRoomStatement = session.prepare(
-            "INSERT INTO " + roomTable + " (room_code, game_id) VALUES (?, ?)"
+            "INSERT INTO " + roomTable + " (room_code, game_id, status) VALUES (?, ?, ?)"
+    );
+    this.updateRoomStatusStatement = session.prepare(
+            "UPDATE " + roomTable + " SET status = ? WHERE room_code = ? AND game_id = ?"
     );
   }
 
@@ -66,7 +70,25 @@ public class CassandraRoomRepositoryImpl implements RoomRepository {
   }
 
   @Override
-  public void addGameIdToRoomCode(String roomCode, UUID gameId) {
-    session.execute(insertGameToRoomStatement.bind(roomCode, gameId));
+  public void addGameIdToRoomCode(String roomCode, UUID gameId, String status) {
+    session.execute(insertGameToRoomStatement.bind(roomCode, gameId, status));
+  }
+
+  @Override
+  public String getPendingGameId(String roomCode) {
+    ResultSet resultSet = session.execute(getGamesByRoomCodeStatement.bind(roomCode));
+    for (Row row : resultSet) {
+      if ("PENDING".equals(row.getString("status"))) {
+        UUID gameId = row.getUUID("game_id");
+        return gameId != null ? gameId.toString() : null;
+      }
+    }
+    return null;
+  }
+
+  @Override
+  public boolean updateRoomStatus(String roomCode, UUID gameId, String status) {
+    ResultSet resultSet = session.execute(updateRoomStatusStatement.bind(status, roomCode, gameId));
+    return resultSet.wasApplied();
   }
 }

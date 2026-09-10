@@ -6,10 +6,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface GameRepository {
-    void createPendingGame(String gameId, String roomCode, String playerName);
-    String getPendingGameId(String roomCode);
-    String getPendingGameCreatorName(String roomCode, String gameId);
-    boolean deletePendingGame(String roomCode, String gameId);
     GameMove saveMove(GameMove move);
     List<GameMove> getGameDetailsByGameId(UUID id);
 }

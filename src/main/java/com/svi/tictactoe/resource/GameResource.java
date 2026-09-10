@@ -77,7 +77,7 @@ public class GameResource {
   public Response cancelPendingGame(@PathParam("roomCode") String rawRoomCode,
           @PathParam("gameId") String gameId) {
 
-    boolean result = gameService.deletePendingGame(rawRoomCode, gameId);
+    boolean result = gameService.cancelPendingGame(rawRoomCode, gameId);
     String message = result ? SuccessMessage.GAME_DELETED.getMessage() : ErrorMessage.DELETE_GAME_FAILED.getMessage();
 
     return Response.ok()

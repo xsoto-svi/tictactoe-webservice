@@ -69,27 +69,23 @@ public class GameServiceImpl implements GameService {
   public String joinPendingGame(String rawRoomCode, String joiningPlayerName) {
     String baseRoomCode = extractBaseRoomCode(rawRoomCode);
 
-    String gameId = gameRepository.getPendingGameId(baseRoomCode);
+    String gameId = roomRepository.getPendingGameId(baseRoomCode);
     if (gameId == null) {
       return null;
     }
 
-    String creatorName = gameRepository.getPendingGameCreatorName(baseRoomCode, gameId);
+    String creatorName = playerRepository.getCreatorByRoomAndGame(baseRoomCode, UUID.fromString(gameId));
 
     /* Windows file system is case-insensitive */
-    if (joiningPlayerName.equalsIgnoreCase(creatorName)) {
+    if (creatorName != null && joiningPlayerName.equalsIgnoreCase(creatorName)) {
       throw new PlayerNameAlreadyTakenException(joiningPlayerName);
     }
 
-    // link both players to this game ID
-    playerRepository.addGameIdToPlayer(UUID.fromString(gameId), creatorName);
-    playerRepository.addGameIdToPlayer(UUID.fromString(gameId), joiningPlayerName);
+    // link joining player to this game ID
+    playerRepository.addGameIdToPlayer(UUID.fromString(gameId), joiningPlayerName, baseRoomCode);
 
-    // link room code to this game ID
-    roomRepository.addGameIdToRoomCode(baseRoomCode, UUID.fromString(gameId));
-
-    // delete pending game file since the match has officially started
-    gameRepository.deletePendingGame(baseRoomCode, gameId);
+    // update room status to MATCHED
+    roomRepository.updateRoomStatus(baseRoomCode, UUID.fromString(gameId), "MATCHED");
 
     return gameId;
   }
@@ -99,16 +95,19 @@ public class GameServiceImpl implements GameService {
     String baseRoomCode = extractBaseRoomCode(rawRoomCode);
 
     String gameIdString = UUID.randomUUID().toString();
-    gameRepository.createPendingGame(gameIdString, baseRoomCode, playerName);
+    UUID gameId = UUID.fromString(gameIdString);
+    
+    roomRepository.addGameIdToRoomCode(baseRoomCode, gameId, "PENDING");
+    playerRepository.addGameIdToPlayer(gameId, playerName, baseRoomCode);
 
     return gameIdString;
   }
 
   @Override
-  public boolean deletePendingGame(String rawRoomCode, String gameId) {
+  public boolean cancelPendingGame(String rawRoomCode, String gameId) {
     String baseRoomCode = extractBaseRoomCode(rawRoomCode);
 
-    return gameRepository.deletePendingGame(baseRoomCode, gameId);
+    return roomRepository.updateRoomStatus(baseRoomCode, UUID.fromString(gameId), "CANCELLED");
   }
 
   /* HELPER FUNCTION: extracts room code from the complete game id and removes 'R's that signifies rematches */
