@@ -1,6 +1,8 @@
 package com.svi.tictactoe.connection;
 
 import com.datastax.driver.core.Cluster;
+import com.datastax.driver.core.ConsistencyLevel;
+import com.datastax.driver.core.QueryOptions;
 import com.datastax.driver.core.Session;
 import com.svi.tictactoe.config.Config;
 import com.svi.tictactoe.exceptions.mapper.CassandraExceptionMapper;
@@ -22,6 +24,7 @@ public class CassandraConnection implements AutoCloseable {
     this.cluster = Cluster.builder()
             .addContactPoint(host)
             .withPort(port)
+            .withQueryOptions(new QueryOptions().setConsistencyLevel(ConsistencyLevel.ONE))
             .build();
 
     this.session = cluster.connect(Config.get(Config.Key.CASSANDRA_KEYSPACE.value()));
