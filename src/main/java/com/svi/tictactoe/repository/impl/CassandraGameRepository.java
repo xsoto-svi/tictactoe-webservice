@@ -44,7 +44,7 @@ public class CassandraGameRepository implements GameRepository {
             "SELECT player_name FROM " + pendingGameTable + " WHERE room_code = ? AND game_id = ?"
     );
     this.deletePendingStatement = session.prepare(
-            "DELETE FROM " + pendingGameTable + " WHERE room_code = ? AND game_id = ? IF EXISTS"
+            "DELETE FROM " + pendingGameTable + " WHERE room_code = ? AND game_id = ?"
     );
 
     this.insertMoveStatement = session.prepare(
